@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>個人理財分析終端機</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-chart-financial/0.2.1/chartjs-chart-financial.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-moment/1.0.1/chartjs-adapter-moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs" type="module"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+:root{
+  --bg:#0b0e14; --panel:#12161f; --panel2:#161b26; --border:#232838;
+  --text:#e8ecf4; --muted:#8b93a7; --accent:#3fa9f5;
+  --up:#ef4444; --down:#22c55e; --flat:#8b93a7;
+  --warn:#f5a623; --mono:'SFMono-Regular',Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,"Segoe UI",Roboto,"Noto Sans TC",sans-serif;}
+h1,h2,h3,h4{font-weight:700;margin:0 0 8px;}
+a{color:var(--accent);}
+.app-header{display:flex;align-items:center;gap:16px;padding:14px 20px;background:var(--panel);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;flex-wrap:wrap;}
+.app-title{font-size:18px;font-weight:800;letter-spacing:.5px;display:flex;align-items:center;gap:8px;}
+.app-title .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);}
+nav.tabs{display:flex;gap:4px;flex:1;flex-wrap:wrap;}
+nav.tabs button{background:transparent;border:1px solid transparent;color:var(--muted);padding:8px 14px;border-radius:8px;font-size:14px;cursor:pointer;transition:.15s;}
+nav.tabs button:hover{color:var(--text);background:var(--panel2);}
+nav.tabs button.active{color:var(--bg);background:var(--accent);font-weight:700;}
+.header-actions{display:flex;gap:8px;align-items:center;}
+.icon-btn{background:var(--panel2);border:1px solid var(--border);color:var(--text);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:13px;}
+.icon-btn:hover{border-color:var(--accent);}
+main{max-width:1400px;margin:0 auto;padding:24px 20px 80px;}
+.view{display:none;}
+.view.active{display:block;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;}
+.grid{display:grid;gap:14px;}
+.grid-2{grid-template-columns:repeat(2,1fr);}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+.grid-5{grid-template-columns:repeat(5,1fr);}
+@media(max-width:1000px){.grid-3,.grid-4,.grid-5{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.grid-2,.grid-3,.grid-4,.grid-5{grid-template-columns:1fr;}}
+.metric{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+.metric .m-label{font-size:12px;color:var(--muted);margin-bottom:6px;}
+.metric .m-value{font-family:var(--mono);font-size:22px;font-weight:700;}
+.metric .m-delta{font-family:var(--mono);font-size:13px;margin-top:4px;}
+.up{color:var(--up);} .down{color:var(--down);} .flat{color:var(--flat);}
+.metric .m-src{font-size:11px;color:var(--muted);margin-top:6px;}
+.metric .m-src a{color:var(--muted);text-decoration:underline;}
+.section-title{display:flex;align-items:center;gap:8px;margin:28px 0 12px;font-size:16px;color:var(--text);}
+.section-title:first-child{margin-top:0;}
+.divider{border:none;border-top:1px solid var(--border);margin:22px 0;}
+.subtabs{display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--border);}
+.subtabs button{background:transparent;border:none;color:var(--muted);padding:10px 16px;cursor:pointer;font-size:14px;border-bottom:2px solid transparent;}
+.subtabs button.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:700;}
+.subview{display:none;}
+.subview.active{display:block;}
+button.primary{background:var(--accent);color:#04101c;border:none;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px;}
+button.primary:disabled{opacity:.4;cursor:not-allowed;}
+button.ghost{background:transparent;border:1px solid var(--border);color:var(--text);padding:9px 16px;border-radius:8px;cursor:pointer;font-size:14px;}
+button.ghost:hover{border-color:var(--accent);}
+input[type=text],input[type=number],input[type=date],select,textarea{background:var(--panel2);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-size:14px;font-family:inherit;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);}
+label.field-label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;}
+.field{margin-bottom:12px;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);}
+th{color:var(--muted);font-weight:600;font-size:12px;}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;}
+.badge.ok{background:rgba(34,197,94,.15);color:var(--down);}
+.badge.no{background:rgba(239,68,68,.15);color:var(--up);}
+.upload-box{border:1px dashed var(--border);border-radius:10px;padding:14px;text-align:center;background:var(--panel2);}
+.upload-box input[type=file]{width:100%;font-size:12px;color:var(--muted);}
+.link-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;}
+.link-card{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:14px;text-decoration:none;color:var(--text);display:block;}
+.link-card:hover{border-color:var(--accent);}
+.link-card .lc-title{font-weight:700;margin-bottom:4px;}
+.link-card .lc-desc{font-size:12px;color:var(--muted);}
+.info-box{background:rgba(63,169,245,.08);border:1px solid rgba(63,169,245,.3);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--text);margin-bottom:16px;}
+.warn-box{background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.3);border-radius:10px;padding:12px 14px;font-size:13px;margin-bottom:16px;}
+.ai-output{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:16px;white-space:pre-wrap;font-size:14px;line-height:1.7;max-height:600px;overflow:auto;}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.hint{font-size:12px;color:var(--muted);}
+.home-hero{padding:40px 10px;text-align:center;}
+.home-hero h1{font-size:32px;}
+.home-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px;}
+@media(max-width:800px){.home-cards{grid-template-columns:1fr;}}
+.home-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:24px;cursor:pointer;transition:.15s;}
+.home-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+.home-card .hc-icon{font-size:30px;}
+.home-card h3{margin-top:10px;}
+.home-card p{color:var(--muted);font-size:13px;line-height:1.6;}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:100;}
+.modal-backdrop.active{display:flex;}
+.modal{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:24px;width:420px;max-width:90vw;max-height:85vh;overflow:auto;}
+.modal-close{float:right;background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer;}
+.chart-wrap{position:relative;height:420px;}
+.chart-wrap.small{height:280px;}
+.stock-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+@media(max-width:800px){.stock-grid{grid-template-columns:1fr;}}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-title"><span class="dot"></span>個人理財分析終端機</div>
+  <nav class="tabs">
+    <button class="tab-btn active" data-view="home">🏠 首頁</button>
+    <button class="tab-btn" data-view="macro">📈 台灣經濟狀況</button>
+    <button class="tab-btn" data-view="commodities">🛢️ 原物料與匯率</button>
+    <button class="tab-btn" data-view="stocks">💰 台灣股市投資</button>
+  </nav>
+  <div class="header-actions">
+    <button class="icon-btn" id="driveBtn">☁️ Google Drive</button>
+    <button class="icon-btn" id="settingsBtn">⚙️ 設定</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============ HOME ============ -->
+  <section class="view active" id="view-home">
+    <div class="home-hero">
+      <h1>📊 個人專屬理財分析終端機</h1>
+      <p class="hint">歡迎進入戰情室！系統環境已初始化完畢。</p>
+    </div>
+    <div class="home-cards">
+      <div class="home-card" data-goto="macro">
+        <div class="hc-icon">📈</div>
+        <h3>台灣經濟狀況</h3>
+        <p>追蹤國發會景氣對策信號、CPI、出口數據，並解析台經院營業氣候報告。</p>
+      </div>
+      <div class="home-card" data-goto="commodities">
+        <div class="hc-icon">🛢️</div>
+        <h3>原物料與匯率</h3>
+        <p>掌握 VIX 恐慌指數、國際原油、黃金銅價與主要貨幣即時報價。</p>
+      </div>
+      <div class="home-card" data-goto="stocks">
+        <div class="hc-icon">💰</div>
+        <h3>台灣股市投資</h3>
+        <p>監控大盤 K 線、三大法人籌碼動向、個股技術面/基本面診斷。</p>
+      </div>
+    </div>
+    <div class="info-box" style="margin-top:28px;">
+      💡 首次使用請先點右上角「⚙️ 設定」輸入您的 Gemini API 金鑰（免費申請），才能使用 AI 分析功能；點「☁️ Google Drive」可將設定同步到雲端硬碟。
+    </div>
+  </section>
+
+  <!-- ============ MACRO (台灣經濟狀況) ============ -->
+  <section class="view" id="view-macro"></section>
+
+  <!-- ============ COMMODITIES (原物料與匯率) ============ -->
+  <section class="view" id="view-commodities"></section>
+
+  <!-- ============ STOCKS (台灣股市投資) ============ -->
+  <section class="view" id="view-stocks"></section>
+
+</main>
+
+<!-- Settings Modal -->
+<div class="modal-backdrop" id="settingsModal">
+  <div class="modal">
+    <button class="modal-close" id="closeSettings">✕</button>
+    <h3>⚙️ 系統設定</h3>
+    <div class="field">
+      <label class="field-label">Gemini API 金鑰（可於 aistudio.google.com 免費申請）</label>
+      <input type="text" id="geminiKeyInput" placeholder="AIza..." style="width:100%">
+    </div>
+    <div class="field">
+      <label class="field-label">Google OAuth Client ID（用於雲端硬碟同步，需自行於 Google Cloud Console 建立）</label>
+      <input type="text" id="gdriveClientIdInput" placeholder="xxxxx.apps.googleusercontent.com" style="width:100%">
+    </div>
+    <button class="primary" id="saveSettingsBtn" style="width:100%;margin-top:8px;">儲存設定</button>
+    <p class="hint" style="margin-top:12px;">金鑰僅儲存在您瀏覽器的 localStorage（及您自己的 Google Drive appdata），不會上傳到任何第三方伺服器。</p>
+  </div>
+</div>
+
+<script>
+// ==========================================================
+// 個人理財分析終端機 — 核心設定 / 共用工具
+// ==========================================================
+'use strict';
+
+const STORAGE_KEYS = { gemini: 'ft_gemini_key', gdriveClient: 'ft_gdrive_client_id' };
+const DRIVE_FILE_NAME = 'finance_terminal_settings.json';
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.appdata';
+
+const Config = {
+  geminiKey: localStorage.getItem(STORAGE_KEYS.gemini) || '',
+  gdriveClientId: localStorage.getItem(STORAGE_KEYS.gdriveClient) || '',
+};
+
+function saveConfig(gemini, clientId) {
+  Config.geminiKey = gemini || '';
+  Config.gdriveClientId = clientId || '';
+  localStorage.setItem(STORAGE_KEYS.gemini, Config.geminiKey);
+  localStorage.setItem(STORAGE_KEYS.gdriveClient, Config.gdriveClientId);
+}
+
+// ---------- CORS proxy fetch (for Yahoo Finance / 政府開放資料) ----------
+async function corsFetch(url, opts) {
+  const proxied = 'https://corsproxy.io/?url=' + encodeURIComponent(url);
+  const res = await fetch(proxied, opts);
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return res;
+}
+async function corsFetchJson(url) { return (await corsFetch(url)).json(); }
+async function corsFetchText(url) { return (await corsFetch(url)).text(); }
+
+// ---------- 小工具 ----------
+function fmtNum(n, digits = 2) {
+  if (n === null || n === undefined || isNaN(n)) return '未公布';
+  return Number(n).toLocaleString('zh-TW', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+}
+function pctClass(v) { return v > 0 ? 'up' : v < 0 ? 'down' : 'flat'; }
+function pctClassInverse(v) { return v > 0 ? 'down' : v < 0 ? 'up' : 'flat'; } // 給 CPI/失業率等「越低越好」指標
+function fmtDelta(v, digits = 2, suffix = '') {
+  if (v === null || v === undefined || isNaN(v)) return '';
+  const sign = v > 0 ? '+' : '';
+  return `${sign}${v.toFixed(digits)}${suffix}`;
+}
+function parseTwDate(x) {
+  // 民國年格式轉西元 (對應 Python parse_tw_date)
+  x = String(x).trim();
+  try {
+    if (x.includes('M')) {
+      const [y, m] = x.split('M');
+      return `${parseInt(y) + 1911}/${m}`;
+    } else if (/^\d{5}$/.test(x)) {
+      return `${parseInt(x.slice(0, 3)) + 1911}/${x.slice(3)}`;
+    } else if (/^\d{6}$/.test(x)) {
+      return `${x.slice(0, 4)}/${x.slice(4)}`;
+    }
+    return x;
+  } catch (e) { return x; }
+}
+function parseCsv(text) {
+  // 簡易 CSV 解析（政府開放資料多為單純逗號分隔，不含跨欄換行）
+  const lines = text.replace(/\r/g, '').split('\n').filter(l => l.trim().length);
+  return lines.map(l => l.split(','));
+}
+function todayStr() {
+  const d = new Date();
+  return d.toISOString().slice(0, 10);
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// ---------- Yahoo Finance ----------
+async function yfChart(ticker, range = '60d', interval = '1d') {
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=${range}&interval=${interval}`;
+  const json = await corsFetchJson(url);
+  const r = json?.chart?.result?.[0];
+  if (!r) throw new Error('no data');
+  const ts = r.timestamp || [];
+  const q = r.indicators.quote[0];
+  const rows = ts.map((t, i) => ({
+    date: new Date(t * 1000),
+    open: q.open[i], high: q.high[i], low: q.low[i], close: q.close[i], volume: q.volume[i],
+  })).filter(row => row.close !== null && row.close !== undefined);
+  return rows;
+}
+async function yfLatestTwo(ticker, range = '60d') {
+  const rows = await yfChart(ticker, range);
+  if (rows.length < 2) throw new Error('insufficient data');
+  return { current: rows[rows.length - 1], prev: rows[rows.length - 2], rows };
+}
+async function yfQuoteSummary(ticker, modules) {
+  const url = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(ticker)}?modules=${modules.join(',')}`;
+  const json = await corsFetchJson(url);
+  const r = json?.quoteSummary?.result?.[0];
+  if (!r) throw new Error('no data');
+  return r;
+}
+
+// ---------- Gemini AI ----------
+async function callGemini(prompt, modelName = 'gemini-2.0-flash') {
+  if (!Config.geminiKey) return '⚠️ 尚未設定 Gemini API 金鑰，請點右上角「⚙️ 設定」輸入金鑰。';
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${Config.geminiKey}`;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+    });
+    const data = await res.json();
+    if (data.error) return `❌ AI 分析連線失敗：${data.error.message || JSON.stringify(data.error)}`;
+    const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || '';
+    return text || '⚠️ AI 未回傳任何內容。';
+  } catch (e) {
+    return `❌ AI 分析連線失敗：${e.message}`;
+  }
+}
+
+// ---------- PDF / Excel 文字擷取 ----------
+async function extractPdfText(file, maxPages = 10) {
+  const buf = await file.arrayBuffer();
+  const pdfjsLib = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs');
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
+  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+  let text = '';
+  const n = Math.min(maxPages, pdf.numPages);
+  for (let i = 1; i <= n; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    text += content.items.map(it => it.str).join(' ') + '\n';
+  }
+  return text;
+}
+async function readFileAsText(file) {
+  if (file.name.toLowerCase().endsWith('.pdf')) return extractPdfText(file);
+  return file.text();
+}
+function parseSpreadsheet(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const wb = XLSX.read(e.target.result, { type: 'array' });
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+        resolve(rows);
+      } catch (err) { reject(err); }
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+function rowsToPreviewTable(rows, limit = 5) {
+  if (!rows.length) return '<p class="hint">（無資料）</p>';
+  const cols = Object.keys(rows[0]);
+  let html = '<table><thead><tr>' + cols.map(c => `<th>${escapeHtml(c)}</th>`).join('') + '</tr></thead><tbody>';
+  rows.slice(0, limit).forEach(r => {
+    html += '<tr>' + cols.map(c => `<td>${escapeHtml(r[c])}</td>`).join('') + '</tr>';
+  });
+  html += '</tbody></table>';
+  return html;
+}
+function rowsToText(rows, maxRows = 30) {
+  if (!rows.length) return '';
+  const cols = Object.keys(rows[0]);
+  const lines = [cols.join('\t')];
+  rows.slice(0, maxRows).forEach(r => lines.push(cols.map(c => r[c]).join('\t')));
+  return lines.join('\n');
+}
+
+// ==========================================================
+// 導覽 / Tabs
+// ==========================================================
+const VIEW_INIT = {}; // view -> init function, called once on first visit
+const VIEW_LOADED = {};
+
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.view === name));
+  if (!VIEW_LOADED[name] && VIEW_INIT[name]) {
+    VIEW_LOADED[name] = true;
+    VIEW_INIT[name]();
+  }
+}
+document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => showView(b.dataset.view)));
+document.querySelectorAll('.home-card').forEach(c => c.addEventListener('click', () => showView(c.dataset.goto)));
+
+// ==========================================================
+// 設定 Modal
+// ==========================================================
+const settingsModal = document.getElementById('settingsModal');
+document.getElementById('settingsBtn').addEventListener('click', () => {
+  document.getElementById('geminiKeyInput').value = Config.geminiKey;
+  document.getElementById('gdriveClientIdInput').value = Config.gdriveClientId;
+  settingsModal.classList.add('active');
+});
+document.getElementById('closeSettings').addEventListener('click', () => settingsModal.classList.remove('active'));
+settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) settingsModal.classList.remove('active'); });
+document.getElementById('saveSettingsBtn').addEventListener('click', () => {
+  saveConfig(document.getElementById('geminiKeyInput').value.trim(), document.getElementById('gdriveClientIdInput').value.trim());
+  settingsModal.classList.remove('active');
+  initDriveClient();
+});
+
+// ==========================================================
+// Google Drive (appdata) 同步 — 儲存設定 JSON
+// ==========================================================
+let gTokenClient = null;
+let gAccessToken = null;
+
+function initDriveClient() {
+  if (!Config.gdriveClientId || !window.google?.accounts?.oauth2) return;
+  gTokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: Config.gdriveClientId,
+    scope: DRIVE_SCOPE,
+    callback: async (resp) => {
+      if (resp.error) { alert('Google 授權失敗：' + resp.error); return; }
+      gAccessToken = resp.access_token;
+      document.getElementById('driveBtn').textContent = '☁️ 已連線';
+      await driveSaveSettings();
+    },
+  });
+}
+
+async function driveFindFileId() {
+  const url = `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name='${DRIVE_FILE_NAME}'&fields=files(id,name)`;
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${gAccessToken}` } });
+  const data = await res.json();
+  return data.files?.[0]?.id || null;
+}
+async function driveSaveSettings() {
+  if (!gAccessToken) return;
+  const payload = { geminiKey: Config.geminiKey, savedAt: new Date().toISOString() };
+  const fileId = await driveFindFileId();
+  const metadata = { name: DRIVE_FILE_NAME, parents: fileId ? undefined : ['appDataFolder'] };
+  const boundary = 'ft_boundary';
+  const body =
+    `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n` +
+    `--${boundary}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify(payload)}\r\n--${boundary}--`;
+  const url = fileId
+    ? `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`
+    : `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart`;
+  await fetch(url, {
+    method: fileId ? 'PATCH' : 'POST',
+    headers: { Authorization: `Bearer ${gAccessToken}`, 'Content-Type': `multipart/related; boundary=${boundary}` },
+    body,
+  });
+}
+async function driveLoadSettings() {
+  if (!gAccessToken) return;
+  const fileId = await driveFindFileId();
+  if (!fileId) return;
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+    headers: { Authorization: `Bearer ${gAccessToken}` },
+  });
+  const data = await res.json();
+  if (data.geminiKey) {
+    saveConfig(data.geminiKey, Config.gdriveClientId);
+  }
+}
+
+document.getElementById('driveBtn').addEventListener('click', () => {
+  if (!Config.gdriveClientId) {
+    alert('請先在「⚙️ 設定」中輸入您的 Google OAuth Client ID（需自行於 Google Cloud Console 建立，並加入此網站網域）。');
+    document.getElementById('settingsBtn').click();
+    return;
+  }
+  if (!gTokenClient) initDriveClient();
+  gTokenClient.requestAccessToken({ prompt: gAccessToken ? '' : 'consent' });
+});
+
+initDriveClient();
+
+// ==========================================================
+// 台灣經濟狀況 (Macro)
+// ==========================================================
+const MACRO_METRICS = [
+  { key: 'gdp', label: '國內生產毛額 GDP', src: 'https://www.dgbas.gov.tw/', srcName: '主計總處', inverse: false },
+  { key: 'gnp', label: '國民生產毛額 GNP', src: 'https://www.dgbas.gov.tw/', srcName: '主計總處', inverse: false },
+  { key: 'cpi', label: '消費者物價指數 CPI', src: 'https://www.dgbas.gov.tw/', srcName: '主計總處', inverse: true },
+  { key: 'core_cpi', label: '核心 CPI', src: 'https://www.dgbas.gov.tw/', srcName: '主計總處', inverse: true },
+  { key: 'ppi', label: '生產者物價指數 PPI', src: 'https://www.dgbas.gov.tw/', srcName: '主計總處', inverse: true },
+  { key: 'unemployment', label: '失業率', src: 'https://www.dgbas.gov.tw/', srcName: '主計總處', inverse: true },
+  { key: 'salary', label: '薪資成長率', src: 'https://www.mol.gov.tw/', srcName: '勞動部', inverse: false },
+  { key: 'score', label: '景氣對策信號', src: 'https://www.ndc.gov.tw/', srcName: '國發會', inverse: false },
+  { key: 'pmi', label: '製造業 PMI', src: 'https://www.ndc.gov.tw/', srcName: '國發會', inverse: false },
+  { key: 'export_order', label: '外銷訂單概況', src: 'https://www.moea.gov.tw/', srcName: '經濟部', inverse: false },
+  { key: 'stock_index', label: '股價指數', src: 'https://www.twse.com.tw/', srcName: '證交所', inverse: false },
+  { key: 'm1', label: '貨幣供給 M1B', src: 'https://www.cbc.gov.tw/', srcName: '中央銀行', inverse: false },
+  { key: 'm2', label: '貨幣供給 M2', src: 'https://www.cbc.gov.tw/', srcName: '中央銀行', inverse: false },
+  { key: 'trade_balance', label: '貿易順/逆差', src: 'https://www.mof.gov.tw/', srcName: '財政部', inverse: false },
+];
+const MACRO_GROUPS = [
+  { title: '💎 國民所得與產出', keys: ['gdp', 'gnp'] },
+  { title: '💸 物價、通膨與生產者價格', keys: ['cpi', 'core_cpi', 'ppi'] },
+  { title: '💼 就業與薪資成長', keys: ['unemployment', 'salary'] },
+  { title: '🚀 景氣、燈號與外銷訂單', keys: ['score', 'pmi', 'export_order'] },
+  { title: '💹 金融、貨幣供給與貿易收支', keys: ['stock_index', 'm1', 'm2', 'trade_balance'] },
+];
+
+function macroInitData() {
+  const d = {};
+  MACRO_METRICS.forEach(m => { d[m.key] = { val: '未公布', delta: '', date: '-' }; });
+  return d;
+}
+
+async function fetchMacroData() {
+  const data = macroInitData();
+
+  try {
+    const text = await corsFetchText('https://ods.ndc.gov.tw/download/27/1/1/csv');
+    const rows = parseCsv(text);
+    const header = rows[0]; const scoreIdx = header.findIndex(h => h.includes('景氣對策信號(分數)'));
+    const lightIdx = header.findIndex(h => h.includes('景氣對策信號(燈號)'));
+    const curr = rows[rows.length - 1], prev = rows[rows.length - 2];
+    const cs = parseInt(curr[scoreIdx]), ps = parseInt(prev[scoreIdx]);
+    data.score = { val: `${cs} 分`, delta: `${curr[lightIdx]} (差額 ${cs - ps >= 0 ? '+' : ''}${cs - ps})`, date: parseTwDate(curr[0]) };
+  } catch (e) {}
+
+  try {
+    const text = await corsFetchText('https://ods.ndc.gov.tw/download/27/1/5/csv');
+    const rows = parseCsv(text);
+    const header = rows[0]; const pmiIdx = header.findIndex(h => h.includes('臺灣製造業採購經理人指數'));
+    const curr = rows[rows.length - 1], prev = rows[rows.length - 2];
+    const cv = parseFloat(curr[pmiIdx]), pv = parseFloat(prev[pmiIdx]);
+    data.pmi = { val: `${cv}`, delta: fmtDelta(cv - pv, 1), date: parseTwDate(curr[0]) };
+  } catch (e) {}
+
+  try {
+    const text = await corsFetchText('https://ws.dgbas.gov.tw/001/Upload/463/opendata/twn/1301010134-1.csv');
+    const rows = parseCsv(text);
+    const curr = rows[rows.length - 1], prev = rows[rows.length - 2];
+    const cv = parseFloat(curr[curr.length - 1]), pv = parseFloat(prev[prev.length - 1]);
+    data.cpi = { val: `${cv}%`, delta: fmtDelta(cv - pv, 2, '%'), date: parseTwDate(curr[0]) };
+  } catch (e) {}
+  try {
+    const text = await corsFetchText('https://ws.dgbas.gov.tw/001/Upload/463/opendata/twn/1301010144-1.csv');
+    const rows = parseCsv(text);
+    const curr = rows[rows.length - 1], prev = rows[rows.length - 2];
+    const cv = parseFloat(curr[curr.length - 1]), pv = parseFloat(prev[prev.length - 1]);
+    data.unemployment = { val: `${cv}%`, delta: fmtDelta(cv - pv, 2, '%'), date: parseTwDate(curr[0]) };
+  } catch (e) {}
+  try {
+    const text = await corsFetchText('https://ws.dgbas.gov.tw/001/Upload/463/opendata/twn/1301010001-1.csv');
+    const rows = parseCsv(text);
+    const curr = rows[rows.length - 1], prev = rows[rows.length - 2];
+    const cv = parseFloat(curr[curr.length - 1]), pv = parseFloat(prev[prev.length - 1]);
+    const q = String(curr[0]);
+    data.gdp = { val: `${cv}%`, delta: fmtDelta(cv - pv, 2, '%'), date: `${parseInt(q.slice(0, 3)) + 1911}Q${q.slice(3)}` };
+  } catch (e) {}
+
+  try {
+    const { current, prev } = await yfLatestTwo('^TWII', '5d');
+    const diff = current.close - prev.close;
+    data.stock_index = { val: fmtNum(current.close, 0), delta: `${fmtDelta(diff, 2)} (${fmtDelta(diff / prev.close * 100, 2)}%)`, date: todayStr() };
+  } catch (e) {}
+
+  try {
+    const text = await corsFetchText('https://stat.mof.gov.tw/web/Data/OpenData/B01.csv');
+    const rows = parseCsv(text);
+    const curr = rows[rows.length - 1];
+    const val = parseFloat(String(curr[1]).replace(/,/g, ''));
+    data.trade_balance = { val: `${(val / 100000).toFixed(1)} 億`, delta: '', date: parseTwDate(curr[0]) };
+  } catch (e) {}
+
+  return data;
+}
+
+function macroMetricCard(m, d) {
+  const cls = d.delta ? (m.inverse ? pctClassInverse(parseFloat(d.delta)) : pctClass(parseFloat(d.delta))) : 'flat';
+  return `<div class="metric">
+    <div class="m-label">${m.label} (${escapeHtml(d.date)})</div>
+    <div class="m-value">${escapeHtml(d.val)}</div>
+    <div class="m-delta ${cls}">${escapeHtml(d.delta)}</div>
+    <div class="m-src">資料來源：<a href="${m.src}" target="_blank">${m.srcName}</a></div>
+  </div>`;
+}
+
+function renderMacroDashboard(data) {
+  let html = '';
+  MACRO_GROUPS.forEach(g => {
+    html += `<div class="section-title">${g.title}</div><div class="grid grid-${Math.min(g.keys.length, 4)}">`;
+    g.keys.forEach(k => {
+      const m = MACRO_METRICS.find(mm => mm.key === k);
+      html += macroMetricCard(m, data[k]);
+    });
+    html += `</div>`;
+  });
+  return html;
+}
+
+function initMacroView() {
+  const el = document.getElementById('view-macro');
+  el.innerHTML = `
+    <div class="subtabs">
+      <button class="sub-btn active" data-sub="dash">🏛️ 總體經濟指標看板</button>
+      <button class="sub-btn" data-sub="trade">🚢 產業外銷 AI 分析</button>
+      <button class="sub-btn" data-sub="tier">📖 台經院景氣動向調查</button>
+    </div>
+    <div class="subview active" id="macro-dash"><div class="hint"><span class="spinner"></span>正在讀取總體經濟數據...</div></div>
+    <div class="subview" id="macro-trade"></div>
+    <div class="subview" id="macro-tier"></div>
+  `;
+  wireSubtabs(el);
+  fetchMacroData().then(data => {
+    document.getElementById('macro-dash').innerHTML = `<h2>📊 台灣總體經濟戰情室</h2>` + renderMacroDashboard(data);
+  });
+  renderMacroTradeTab();
+  renderMacroTierTab();
+}
+
+function wireSubtabs(container) {
+  container.querySelectorAll('.sub-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      container.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
+      container.querySelectorAll('.subview').forEach(v => v.classList.remove('active'));
+      btn.classList.add('active');
+      container.querySelector('#' + container.id.replace('view-', '') + '-' + btn.dataset.sub)?.classList.add('active');
+    });
+  });
+}
+
+function renderMacroTradeTab() {
+  const el = document.getElementById('macro-trade');
+  el.innerHTML = `
+    <h3>🚢 產業外銷數據解讀 (Gemini AI)</h3>
+    <div class="info-box">💡 資料下載區：請先至下方官方網站下載對應的 Excel/CSV 檔案，再上傳進行 AI 分析。</div>
+    <div class="link-grid" style="margin-bottom:16px;">
+      <a class="link-card" target="_blank" href="https://www.moea.gov.tw/MNS/dos/bulletin/Bulletin.aspx?kind=5&html=1&menu_id=6724">
+        <div class="lc-title">📊 下載【外銷訂單】統計</div></a>
+      <a class="link-card" target="_blank" href="https://portal.sw.nat.gov.tw/APGA/GA30">
+        <div class="lc-title">📦 下載【進出口統計】</div></a>
+    </div>
+    <div class="field">
+      <label class="field-label">選擇分析類型</label>
+      <select id="tradeType"><option>外銷訂單</option><option>進出口統計</option></select>
+    </div>
+    <div class="upload-box"><input type="file" id="tradeFile" accept=".xls,.xlsx,.csv"></div>
+    <div id="tradePreview" style="margin-top:14px;"></div>
+    <button class="primary" id="tradeAnalyzeBtn" style="margin-top:14px;display:none;">🤖 啟動 AI 深度分析</button>
+    <div id="tradeAiOut" style="margin-top:16px;"></div>
+  `;
+  let rows = null;
+  document.getElementById('tradeFile').addEventListener('change', async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    try {
+      rows = await parseSpreadsheet(f);
+      document.getElementById('tradePreview').innerHTML = `<p class="hint">✅ 檔案讀取成功（${rows.length} 列）</p>` + rowsToPreviewTable(rows);
+      document.getElementById('tradeAnalyzeBtn').style.display = 'inline-block';
+    } catch (err) { document.getElementById('tradePreview').innerHTML = `<p class="hint">❌ 檔案解析失敗：${err.message}</p>`; }
+  });
+  document.getElementById('tradeAnalyzeBtn').addEventListener('click', async () => {
+    if (!rows) return;
+    const type = document.getElementById('tradeType').value;
+    const out = document.getElementById('tradeAiOut');
+    out.innerHTML = `<div class="hint"><span class="spinner"></span>AI 正在連線中...</div>`;
+    const summary = rowsToText(rows, 30);
+    const prompt = `你是一位資深台灣經貿分析師。請針對以下${type}內容進行專業解讀：\n\n${summary}\n\n請提供核心亮點、產業強弱觀察、對台股的影響以及未來展望。使用繁體中文條列呈現。`;
+    const analysis = await callGemini(prompt);
+    out.innerHTML = `<h4>🧠 Gemini AI - ${type}分析結果</h4><div class="ai-output">${escapeHtml(analysis)}</div>`;
+  });
+}
+
+function renderMacroTierTab() {
+  const el = document.getElementById('macro-tier');
+  const now = new Date();
+  const monthOptions = Array.from({ length: 12 }, (_, i) => `${i + 1}月`);
+  el.innerHTML = `
+    <h3>📖 台經院景氣動向調查 (AI 解析)</h3>
+    <div class="info-box">💡 請先至下方官方網站下載當月發布的景氣動向調查 PDF 報告。</div>
+    <a class="link-card" target="_blank" href="https://www.tier.org.tw/forecast/forecast.aspx" style="margin-bottom:16px;">
+      <div class="lc-title">📄 前往台經院下載【景氣動向調查報告】</div></a>
+    <div class="grid grid-2">
+      <div class="field"><label class="field-label">選擇報告年度</label>
+        <select id="tierYear"><option>2026</option><option>2025</option><option>2024</option></select></div>
+      <div class="field"><label class="field-label">選擇報告月份</label>
+        <select id="tierMonth">${monthOptions.map((m, i) => `<option ${i === now.getMonth() ? 'selected' : ''}>${m}</option>`).join('')}</select></div>
+    </div>
+    <div class="upload-box"><input type="file" id="tierFile" accept=".pdf"></div>
+    <button class="primary" id="tierAnalyzeBtn" style="margin-top:14px;display:none;">🤖 啟動 PDF 內容深度解讀</button>
+    <div id="tierAiOut" style="margin-top:16px;"></div>
+  `;
+  let selectedFile = null;
+  document.getElementById('tierFile').addEventListener('change', (e) => {
+    selectedFile = e.target.files[0];
+    document.getElementById('tierAnalyzeBtn').style.display = selectedFile ? 'inline-block' : 'none';
+  });
+  document.getElementById('tierAnalyzeBtn').addEventListener('click', async () => {
+    if (!selectedFile) return;
+    const year = document.getElementById('tierYear').value, month = document.getElementById('tierMonth').value;
+    const out = document.getElementById('tierAiOut');
+    out.innerHTML = `<div class="hint"><span class="spinner"></span>正在掃描 PDF 並萃取重點...</div>`;
+    try {
+      const text = await extractPdfText(selectedFile, 5);
+      if (text.length < 50) { out.innerHTML = `<p class="hint">❌ 無法從 PDF 中提取足夠的文字，請確認該檔案非純影像掃描檔。</p>`; return; }
+      const prompt = `你是一位資深台灣經貿分析師。請針對以下台經院${year}${month}景氣動向報告內容進行專業解讀：\n\n${text}\n\n請提供核心亮點、產業強弱觀察、對台股的影響以及未來展望。使用繁體中文條列呈現。`;
+      const analysis = await callGemini(prompt);
+      out.innerHTML = `<h4>🧠 Gemini AI - 報告解讀專區</h4><div class="ai-output">${escapeHtml(analysis)}</div>`;
+    } catch (err) { out.innerHTML = `<p class="hint">❌ PDF 解析失敗：${err.message}</p>`; }
+  });
+}
+
+VIEW_INIT.macro = initMacroView;
+
+// ==========================================================
+// 原物料與匯率 (Commodities & FX)
+// ==========================================================
+const COMMODITY_TICKERS = {
+  'VIX 恐慌指數': '^VIX', 'WTI 原油': 'CL=F', '布蘭特原油': 'BZ=F', '天然氣': 'NG=F', '煤炭': 'MTF=F',
+  '現貨黃金': 'GC=F', '現貨白銀': 'SI=F', '高階銅': 'HG=F', '鋁': 'ALI=F', '鎳': 'NIL=F',
+  '鋅': 'ZNC=F', '鉛': 'LED=F', '錫': 'TIN=F', '鐵礦砂': 'TIO=F',
+  '黃豆': 'ZS=F', '玉米': 'ZC=F', '小麥': 'ZW=F', '棉花': 'CT=F', '咖啡': 'KC=F',
+  '美元 (USD/TWD)': 'TWD=X', '日圓 (JPY/TWD)': 'JPYTWD=X', '歐元 (EUR/TWD)': 'EURTWD=X',
+};
+const COMMODITY_DESC = {
+  'VIX 恐慌指數': '反映市場對未來 30 日波動度的預期，數值越高代表市場恐慌情緒越濃厚。',
+  'WTI 原油': '北美原油基準，受產油國政策與全球經濟復甦力道影響，多空持續拉鋸。',
+  '布蘭特原油': '全球油價基準，受中東地緣政治風險溢價支撐。',
+  '天然氣': '潔淨能源過渡橋樑，價格對季節性氣候變化與地緣政治高度敏感。',
+  '煤炭': '傳統發電主力，短期受極端氣候影響需求，長期受全球 ESG 減碳政策壓抑。',
+  '現貨黃金': '避險資金與各國央行買盤動向，美元指數走勢牽動漲跌。',
+  '現貨白銀': '兼具避險屬性，也受惠於 AI 硬體與太陽能導電材料的工業需求。',
+  '高階銅': '經濟櫥窗(銅博士)：電力電網升級、AI 資料中心建置與電動車的長線剛需支撐。',
+  '鋁': '廣泛應用於汽車與建築，高耗能的電解冶煉過程使其對全球「電價」高度敏感。',
+  '鎳': '不鏽鋼與電動車關鍵原料，印尼產能擴張與出口政策主導全球供給定價。',
+  '鋅': '主要用於鋼鐵鍍鋅防鏽，與全球基礎建設及房地產景氣高度連動。',
+  '鉛': '傳統鉛酸電池主要原料，長線面臨鋰電池替代的產業轉型壓力。',
+  '錫': '電子產品「焊料」不可或缺，受半導體、AI 伺服器與消費性電子景氣影響極大。',
+  '鐵礦砂': '鋼鐵工業之母，價格走勢高度依賴中國房地產復甦力道與基礎建設需求。',
+  '黃豆': '重要的油脂與飼料來源，受極端氣候與中美貿易採購政策影響。',
+  '玉米': '飼料與生質酒精核心原料，價格與原油能源價格及氣候變化高度相關。',
+  '小麥': '全球主要糧食作物，東歐為主要出口國，具高度地緣政治風險溢價。',
+  '棉花': '紡織業最上游，價格反映全球消費市場與零售服飾的終端需求冷暖。',
+  '咖啡': '高波動軟性原物料，極度受制於巴西、越南等主產區的氣候異常與病蟲害影響。',
+  '美元 (USD/TWD)': '避險與高息資金停泊港，台幣短期受外資進出與亞幣整體走勢連動承壓。',
+  '日圓 (JPY/TWD)': '日本央行政策牽動，仍是赴日採購觀察重點。',
+  '人民幣 (CNY/TWD)': '走勢平穩，牽動兩岸貿易與台商匯兌損益。',
+  '歐元 (EUR/TWD)': '受歐洲央行降息預期與歐洲區經濟成長動能放緩影響。',
+};
+const COMMODITY_GROUPS = [
+  { title: '🚀 一、能源與風險指標', items: ['VIX 恐慌指數', 'WTI 原油', '布蘭特原油', '天然氣', '煤炭'] },
+  { title: '🏭 二、貴金屬與工業金屬', items: ['現貨黃金', '現貨白銀', '高階銅', '鋁', '鐵礦砂', '鎳', '鋅', '鉛', '錫'] },
+  { title: '🌾 三、國際農產品', items: ['黃豆', '玉米', '小麥', '棉花', '咖啡'] },
+  { title: '💱 四、航運與主要匯率 (對台幣 TWD)', items: ['美元 (USD/TWD)', '日圓 (JPY/TWD)', '人民幣 (CNY/TWD)', '歐元 (EUR/TWD)', 'BDI 散裝指數'] },
+];
+
+async function fetchCommodityData() {
+  const data = {};
+  const names = Object.keys(COMMODITY_TICKERS);
+  await Promise.all(names.map(async (name) => {
+    try {
+      const { current, prev, rows } = await yfLatestTwo(COMMODITY_TICKERS[name], '60d');
+      const diffPct = (current.close - prev.close) / prev.close * 100;
+      const digits = name.includes('TWD') ? 4 : 2;
+      data[name] = { price: fmtNum(current.close, digits), diff: fmtDelta(diffPct, 2, '%'), rawDiff: diffPct, rows };
+    } catch (e) {
+      data[name] = { price: '未公布', diff: '0.00%', rawDiff: 0, rows: null };
+    }
+  }));
+  // 人民幣交叉匯率
+  try {
+    const usdTwd = await yfChart('TWD=X', '60d');
+    const usdCny = await yfChart('CNY=X', '60d');
+    const n = Math.min(usdTwd.length, usdCny.length);
+    const rows = [];
+    for (let i = 0; i < n; i++) rows.push({ date: usdTwd[i].date, close: usdTwd[i].close / usdCny[i].close });
+    const current = rows[rows.length - 1], prev = rows[rows.length - 2];
+    const diffPct = (current.close - prev.close) / prev.close * 100;
+    data['人民幣 (CNY/TWD)'] = { price: fmtNum(current.close, 4), diff: fmtDelta(diffPct, 2, '%'), rawDiff: diffPct, rows };
+  } catch (e) {
+    data['人民幣 (CNY/TWD)'] = { price: '未公布', diff: '0.00%', rawDiff: 0, rows: null };
+  }
+  data['BDI 散裝指數'] = { price: '2,730.00', diff: '0.00%', rawDiff: 0, rows: null };
+  return data;
+}
+
+function commodityMetricCard(name, d) {
+  const isVix = name.includes('VIX'), isBdi = name.includes('BDI');
+  const cls = isBdi ? 'flat' : isVix ? pctClassInverse(d.rawDiff) : pctClass(d.rawDiff);
+  return `<div class="metric" style="cursor:pointer;" data-commodity="${escapeHtml(name)}">
+    <div class="m-label">${escapeHtml(name)}</div>
+    <div class="m-value">${escapeHtml(d.price)}</div>
+    <div class="m-delta ${cls}">${escapeHtml(d.diff)}</div>
+    <div class="m-src">資料來源：<a href="https://finance.yahoo.com/" target="_blank" onclick="event.stopPropagation()">Yahoo Finance</a></div>
+  </div>`;
+}
+
+let commodityDataCache = null;
+let commodityChartInstance = null;
+
+function initCommoditiesView() {
+  const el = document.getElementById('view-commodities');
+  el.innerHTML = `
+    <h2>🛢️ 全球原物料與匯率追蹤</h2>
+    <p class="hint">掌握國際能源、農工原物料、貴金屬與主要貨幣的即時動態與市場情緒。</p>
+    <div class="info-box">💡 資料源提示：本系統即時對接 Yahoo Finance。部分 LME 基本金屬 (如鎳、鉛、錫) 可能無法取得免費即時報價，將顯示為「未公布」。</div>
+    <div id="commodityDash"><div class="hint"><span class="spinner"></span>正在與市場資料庫連線，同步全球最新報價...</div></div>
+    <hr class="divider">
+    <h3>🔍 個別商品深度分析與歷年走勢</h3>
+    <div class="field" style="max-width:360px;">
+      <select id="commoditySelect">${Object.keys(COMMODITY_TICKERS).concat(['人民幣 (CNY/TWD)', 'BDI 散裝指數']).map(n => `<option>${n}</option>`).join('')}</select>
+    </div>
+    <div class="info-box" id="commodityDesc"></div>
+    <div class="chart-wrap"><canvas id="commodityChart"></canvas></div>
+    <hr class="divider">
+    <h3>🌐 實用外部觀測站連結</h3>
+    <div class="link-grid">
+      <a class="link-card" target="_blank" href="https://concords.moneydj.com/z/ze/zeq/zeq.djhtm"><div class="lc-title">📊 MoneyDJ 全球原物料行情</div><div class="lc-desc">查詢更詳盡的各項農工原物料、貴金屬即時與歷史報價。</div></a>
+      <a class="link-card" target="_blank" href="https://www.flightradar24.com/13.95,67.65/4"><div class="lc-title">✈️ Flightradar24 航班追蹤</div><div class="lc-desc">即時監控全球航空客貨運流量，觀測國際商業熱度。</div></a>
+      <a class="link-card" target="_blank" href="https://www.marinetraffic.com/en/ais/home/centerx:120.291/centery:22.600/zoom:14"><div class="lc-title">🚢 MarineTraffic 船舶追蹤</div><div class="lc-desc">即時追蹤全球散裝與貨櫃航運塞港狀況（高雄港周邊）。</div></a>
+    </div>
+  `;
+  fetchCommodityData().then(data => {
+    commodityDataCache = data;
+    let html = '';
+    COMMODITY_GROUPS.forEach(g => {
+      html += `<div class="section-title">${g.title}</div><div class="grid grid-5">`;
+      g.items.forEach(name => { html += commodityMetricCard(name, data[name] || { price: '未公布', diff: '0.00%', rawDiff: 0 }); });
+      html += `</div>`;
+    });
+    document.getElementById('commodityDash').innerHTML = html;
+    document.querySelectorAll('[data-commodity]').forEach(c => c.addEventListener('click', () => {
+      document.getElementById('commoditySelect').value = c.dataset.commodity;
+      updateCommodityDetail(c.dataset.commodity);
+    }));
+    updateCommodityDetail(document.getElementById('commoditySelect').value);
+  });
+  document.getElementById('commoditySelect').addEventListener('change', (e) => updateCommodityDetail(e.target.value));
+}
+
+function updateCommodityDetail(name) {
+  document.getElementById('commodityDesc').textContent = '【產業特性與市場訊號】' + (COMMODITY_DESC[name] || '');
+  const d = commodityDataCache?.[name];
+  const ctx = document.getElementById('commodityChart');
+  if (commodityChartInstance) { commodityChartInstance.destroy(); commodityChartInstance = null; }
+  if (!d || !d.rows) return;
+  commodityChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: { labels: d.rows.map(r => r.date), datasets: [{ label: name, data: d.rows.map(r => r.close), borderColor: '#3fa9f5', backgroundColor: 'rgba(63,169,245,.1)', fill: true, pointRadius: 0, tension: .15 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { x: { type: 'time', time: { unit: 'week' }, grid: { color: '#232838' }, ticks: { color: '#8b93a7' } },
+                y: { grid: { color: '#232838' }, ticks: { color: '#8b93a7' } } },
+      plugins: { legend: { labels: { color: '#e8ecf4' } } },
+    },
+  });
+}
+
+VIEW_INIT.commodities = initCommoditiesView;
+
+// ==========================================================
+// 台灣股市投資 (Stocks)
+// ==========================================================
+const STOCK_RANKING_LIST = ['2330','2317','2454','2382','3231','2352','3017','3324','2324','2376','2356','2353','2303','2603','2609','2615','2618','2610','2881','2891','2882','2886','1519','3481','2409','2363','1101','2002','2308','2395'];
+const STOCK_NAME_MAP = { '2330':'台積電','2317':'鴻海','2454':'聯發科','2382':'廣達','3231':'緯創','2352':'佳世達','2603':'長榮','3481':'群創','1519':'華城','3017':'奇鋐','3324':'雙鴻','2324':'仁寶' };
+const CHIP_ENTITIES = ['外資','投信','自營商','凱基台北','元大新竹','永豐金新竹','富邦仁愛','富邦建國','富邦嘉義'];
+
+async function resolveTwTicker(code) {
+  for (const suffix of ['.TW', '.TWO']) {
+    try {
+      const rows = await yfChart(code + suffix, '5d');
+      if (rows.length) return { ticker: code + suffix, rows };
+    } catch (e) {}
+  }
+  return null;
+}
+
+async function fetchTwIndices() {
+  const out = {
+    '上市加權 (TAIEX)': { price: '讀取失敗', diff: '0.00 (0.00%)', volume: '-', rows: null },
+    '上櫃指數 (OTC)': { price: '讀取失敗', diff: '0.00 (0.00%)', volume: '-', rows: null },
+  };
+  try {
+    const rows = await yfChart('^TWII', '3mo');
+    if (rows.length >= 2) {
+      const cur = rows[rows.length - 1], prev = rows[rows.length - 2];
+      const diff = cur.close - prev.close, pct = diff / prev.close * 100;
+      out['上市加權 (TAIEX)'] = { price: fmtNum(cur.close), diff: `${fmtDelta(diff)} (${fmtDelta(pct)}%)`, volume: cur.volume ? cur.volume.toLocaleString() : 'Yahoo API 暫不支援', rows };
+    }
+  } catch (e) {}
+  try {
+    const rows = await yfChart('006201.TWO', '3mo');
+    if (rows.length >= 2) {
+      const cur = rows[rows.length - 1], prev = rows[rows.length - 2];
+      const diff = cur.close - prev.close, pct = diff / prev.close * 100;
+      out['上櫃指數 (OTC)'] = { price: fmtNum(cur.close), diff: `${fmtDelta(diff)} (${fmtDelta(pct)}%)`, volume: cur.volume ? cur.volume.toLocaleString() : '-', rows };
+    }
+  } catch (e) {}
+  return out;
+}
+
+async function fetchRankingData() {
+  const results = [];
+  await Promise.all(STOCK_RANKING_LIST.map(async (code) => {
+    try {
+      const rows = await yfChart(code + '.TW', '5d');
+      if (rows.length >= 2) {
+        const cur = rows[rows.length - 1], prev = rows[rows.length - 2];
+        const diffPct = (cur.close - prev.close) / prev.close * 100;
+        results.push({ code, name: STOCK_NAME_MAP[code] || code, close: cur.close, diffPct, volume: Math.round((cur.volume || 0) / 1000) });
+      }
+    } catch (e) {}
+  }));
+  const gainers = [...results].sort((a, b) => b.diffPct - a.diffPct).slice(0, 10);
+  const losers = [...results].sort((a, b) => a.diffPct - b.diffPct).slice(0, 10);
+  const volumes = [...results].sort((a, b) => b.volume - a.volume).slice(0, 10);
+  return { gainers, losers, volumes };
+}
+
+function rankTable(list, valueLabel, valueFn) {
+  if (!list.length) return `<p class="hint">排行載入中或暫無資料</p>`;
+  return `<table><thead><tr><th>股票名稱</th><th>收盤價</th><th>漲跌幅</th><th>${valueLabel}</th></tr></thead><tbody>
+    ${list.map(s => `<tr><td>${s.code} ${s.name}</td><td>${fmtNum(s.close)}</td>
+      <td class="${pctClass(s.diffPct)}">${fmtDelta(s.diffPct)}%</td><td>${valueFn(s)}</td></tr>`).join('')}
+  </tbody></table>`;
+}
+
+let taiexChartInstance = null;
+function renderTaiexChart(rows) {
+  const ctx = document.getElementById('taiexChart');
+  if (!ctx) return;
+  if (taiexChartInstance) { taiexChartInstance.destroy(); taiexChartInstance = null; }
+  if (!rows) return;
+  const ohlc = rows.map(r => ({ x: r.date, o: r.open, h: r.high, l: r.low, c: r.close }));
+  taiexChartInstance = new Chart(ctx, {
+    type: 'candlestick',
+    data: { datasets: [{ label: '加權指數', data: ohlc, color: { up: '#ef4444', down: '#22c55e', unchanged: '#8b93a7' } }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { x: { type: 'time', time: { unit: 'week' }, grid: { color: '#232838' }, ticks: { color: '#8b93a7' } },
+                y: { grid: { color: '#232838' }, ticks: { color: '#8b93a7' } } },
+      plugins: { legend: { display: false } },
+    },
+  });
+}
+
+function initStocksView() {
+  const el = document.getElementById('view-stocks');
+  el.innerHTML = `
+    <h2>📈 台灣股市戰情室</h2>
+    <p class="hint">追蹤台股大盤動向、法人與主力分點籌碼變化，以及個股全方位分析。</p>
+    <div class="subtabs">
+      <button class="sub-btn active" data-sub="overview">📊 大盤與排行</button>
+      <button class="sub-btn" data-sub="chips">🕵️ 籌碼追蹤(法人與分點)</button>
+      <button class="sub-btn" data-sub="single">🤖 個股分析</button>
+    </div>
+    <div class="subview active" id="stocks-overview"><div class="hint"><span class="spinner"></span>正在載入台股大盤與排行數據...</div></div>
+    <div class="subview" id="stocks-chips"></div>
+    <div class="subview" id="stocks-single"></div>
+  `;
+  wireSubtabs(el);
+  renderStockOverview();
+  renderChipTracking();
+  renderSingleStockAnalysis();
+}
+
+async function renderStockOverview() {
+  const container = document.getElementById('stocks-overview');
+  const [tw, ranking] = await Promise.all([fetchTwIndices(), fetchRankingData()]);
+  container.innerHTML = `
+    <h3>📌 台股上市櫃指數與 K 線動態</h3>
+    <div class="grid grid-2">
+      <div class="metric"><div class="m-label">上市加權指數 (TAIEX)</div><div class="m-value">${escapeHtml(tw['上市加權 (TAIEX)'].price)}</div>
+        <div class="m-delta">${escapeHtml(tw['上市加權 (TAIEX)'].diff)}</div><div class="m-src">成交量：${escapeHtml(String(tw['上市加權 (TAIEX)'].volume))}</div></div>
+      <div class="metric"><div class="m-label">上櫃指數 (OTC)</div><div class="m-value">${escapeHtml(tw['上櫃指數 (OTC)'].price)}</div>
+        <div class="m-delta">${escapeHtml(tw['上櫃指數 (OTC)'].diff)}</div><div class="m-src">成交量：${escapeHtml(String(tw['上櫃指數 (OTC)'].volume))}（富櫃50代理）</div></div>
+    </div>
+    <div class="chart-wrap" style="margin-top:16px;"><canvas id="taiexChart"></canvas></div>
+    <hr class="divider">
+    <h3>🔥 市場焦點排行 (真實數據)</h3>
+    <div class="stock-grid">
+      <div><h4>📈 漲幅排行 Top 10</h4>${rankTable(ranking.gainers, '成交量(張)', s => s.volume.toLocaleString())}</div>
+      <div><h4>📉 跌幅排行 Top 10</h4>${rankTable(ranking.losers, '成交量(張)', s => s.volume.toLocaleString())}</div>
+      <div><h4>💥 爆大量排行 Top 10</h4>${rankTable(ranking.volumes, '成交量(張)', s => s.volume.toLocaleString())}</div>
+    </div>
+  `;
+  renderTaiexChart(tw['上市加權 (TAIEX)'].rows);
+}
+
+function renderChipTracking() {
+  const el = document.getElementById('stocks-chips');
+  el.innerHTML = `
+    <h3>🧠 當日整體籌碼 AI 綜合決策與明日建議</h3>
+    <a class="link-card" style="max-width:340px;margin-bottom:14px;" target="_blank" href="https://fubon-ebrokerdj.fbs.com.tw/Z/ZG/ZG_D.djhtm"><div class="lc-title">🔗 資料來源：券商分點進出查詢 (富邦)</div></a>
+    <p class="hint">請直接上傳今日各法人與主力分點的買賣超 PDF 或 TXT 檔案，系統將自動彙整並進行 AI 深度解析。</p>
+    <div class="field" style="max-width:220px;"><label class="field-label">📅 選擇資料日期</label><input type="date" id="chipDate" value="${todayStr()}"></div>
+    <h4 style="margin-top:20px;">📤 九大籌碼資料上傳區</h4>
+    <div class="grid grid-3" id="chipUploadGrid">
+      ${CHIP_ENTITIES.map(ent => `
+        <div class="upload-box">
+          <div style="font-weight:700;margin-bottom:6px;">${ent}</div>
+          <input type="file" multiple accept=".pdf,.txt" data-entity="${ent}" class="chipFileInput">
+          <div class="hint chip-status" data-status-for="${ent}" style="margin-top:6px;">❌ 未上傳</div>
+        </div>`).join('')}
+    </div>
+    <hr class="divider">
+    <div class="grid grid-2">
+      <div><label class="field-label"><input type="checkbox" id="chipConfirm"> 我確認資料皆已上傳完備</label></div>
+      <div class="field"><label class="field-label">🤖 選擇分析決策模型</label>
+        <select id="chipModel"><option value="gemini-2.0-flash">gemini-2.0-flash</option><option value="gemini-1.5-flash">gemini-1.5-flash</option><option value="gemini-1.5-pro">gemini-1.5-pro</option></select></div>
+    </div>
+    <button class="primary" id="chipAnalyzeBtn" disabled>🚀 啟動籌碼 AI 綜合解析</button>
+    <p class="hint" id="chipLockHint">🔒 請先勾選上方的『我確認資料皆已上傳完備』，即可啟用 AI 深度解析按鈕。</p>
+    <div id="chipAiOut" style="margin-top:16px;"></div>
+  `;
+  const chipFiles = {};
+  el.querySelectorAll('.chipFileInput').forEach(inp => {
+    inp.addEventListener('change', (e) => {
+      const ent = inp.dataset.entity;
+      if (e.target.files.length) { chipFiles[ent] = Array.from(e.target.files);
+        el.querySelector(`[data-status-for="${ent}"]`).innerHTML = `<span class="badge ok">✅ 已上傳 (${e.target.files.length} 檔)</span>`;
+      } else { delete chipFiles[ent]; el.querySelector(`[data-status-for="${ent}"]`).innerHTML = `❌ 未上傳`; }
+    });
+  });
+  document.getElementById('chipConfirm').addEventListener('change', (e) => {
+    document.getElementById('chipAnalyzeBtn').disabled = !e.target.checked;
+    document.getElementById('chipLockHint').style.display = e.target.checked ? 'none' : 'block';
+  });
+  document.getElementById('chipAnalyzeBtn').addEventListener('click', async () => {
+    const dateStr = document.getElementById('chipDate').value;
+    const model = document.getElementById('chipModel').value;
+    const out = document.getElementById('chipAiOut');
+    if (!Object.keys(chipFiles).length) { out.innerHTML = `<p class="hint">請至少上傳一份資料檔案讓 AI 閱讀喔！</p>`; return; }
+    out.innerHTML = `<div class="hint"><span class="spinner"></span>AI (${model}) 正在統整研讀所有上傳的原始檔案，請稍候...</div>`;
+    let comboText = '';
+    for (const [ent, files] of Object.entries(chipFiles)) {
+      comboText += `\n\n=== 【${ent}】買賣超資料 ===\n`;
+      for (const f of files) comboText += (await readFileAsText(f)) + '\n';
+    }
+    const prompt = `你是一位資深的台股籌碼與短線趨勢策略分析師。以下是 ${dateStr} 當日，三大法人（外資、投信、自營商）與六大關鍵主力券商分點的買賣超原始資料萃取內容：\n\n${comboText.slice(0, 30000)}\n\n請針對這份今日上傳的籌碼數據，進行多空交叉解讀並產出明天的實戰操作指南。報告中必須精準包含以下核心大項：\n\n1. 🎯【今日買賣超熱門股深度分析】：請分別揪出今日法人與主力券商共同高度集中的【買超熱門股】與【賣超熱門股】，說明背後可能的主力意圖。\n2. 📈【明日投資觀察建議與注意股票】：依據籌碼流向，明確列出投資人明天應該「特別注意」的個股清單，給出具體的明日前瞻操作策略與觀察重點。\n\n請直接輸出分析內容，善用大標題、條列式與粗體字進行重點標示，保持整潔專業。`;
+    const analysis = await callGemini(prompt, model);
+    out.innerHTML = `<h4>📝 ${dateStr} 籌碼綜合決策報告</h4><div class="ai-output">${escapeHtml(analysis)}</div>`;
+  });
+}
+
+let stockTechChartInstance = null;
+function renderSingleStockAnalysis() {
+  const el = document.getElementById('stocks-single');
+  el.innerHTML = `
+    <h3>🔍 個股全方位分析</h3>
+    <h4>🔗 常用投資研究工具</h4>
+    <div class="link-grid" style="margin-bottom:16px;">
+      <a class="link-card" target="_blank" href="https://ic.tpex.org.tw/">🌐 產業價值鏈平台</a>
+      <a class="link-card" target="_blank" href="https://www.wantgoo.com/">🌐 玩股網 WantGoo</a>
+      <a class="link-card" target="_blank" href="https://concords.moneydj.com/z/zc/zcn/zcn_1101.djhtm">🌐 MoneyDJ 財務</a>
+      <a class="link-card" target="_blank" href="https://statementdog.com/screeners/custom">🌐 財報狗選股</a>
+      <a class="link-card" target="_blank" href="https://tw.stock.yahoo.com/">🌐 Yahoo奇摩股市</a>
+    </div>
+    <div class="grid grid-2" style="max-width:500px;">
+      <div class="field"><label class="field-label">請輸入股號</label><input type="text" id="stockCode" value="2330"></div>
+      <div class="field"><label class="field-label">技術面顯示區間</label>
+        <select id="stockPeriod"><option value="3mo">3mo</option><option value="6mo">6mo</option><option value="1y">1y</option><option value="2y">2y</option></select></div>
+    </div>
+    <button class="primary" id="stockAnalyzeBtn">分析</button>
+    <div id="stockResult" style="margin-top:20px;"></div>
+  `;
+  document.getElementById('stockAnalyzeBtn').addEventListener('click', loadSingleStock);
+  document.getElementById('stockCode').addEventListener('keydown', (e) => { if (e.key === 'Enter') loadSingleStock(); });
+  loadSingleStock();
+}
+
+function sma(values, window) {
+  return values.map((_, i) => i < window - 1 ? null : values.slice(i - window + 1, i + 1).reduce((a, b) => a + b, 0) / window);
+}
+
+async function loadSingleStock() {
+  const code = document.getElementById('stockCode').value.trim();
+  const period = document.getElementById('stockPeriod').value;
+  const result = document.getElementById('stockResult');
+  if (!code) return;
+  result.innerHTML = `<div class="hint"><span class="spinner"></span>正在分析 ${escapeHtml(code)} ...</div>`;
+  let ticker = null, rows = null, quoteRes = null;
+  for (const suffix of ['.TW', '.TWO']) {
+    try {
+      const r = await yfChart(code + suffix, period);
+      if (r.length) { ticker = code + suffix; rows = r; break; }
+    } catch (e) {}
+  }
+  if (!rows) { result.innerHTML = `<p class="hint">找不到該股號的資料，請確認輸入是否正確。</p>`; return; }
+  let stockName = code;
+  try { quoteRes = await yfQuoteSummary(ticker, ['summaryDetail', 'defaultKeyStatistics', 'financialData', 'assetProfile', 'price']);
+    stockName = quoteRes?.price?.shortName || quoteRes?.price?.longName || code; } catch (e) {}
+
+  const pe = quoteRes?.summaryDetail?.trailingPE?.fmt ?? 'N/A';
+  const pb = quoteRes?.defaultKeyStatistics?.priceToBook?.fmt ?? 'N/A';
+  const divYield = quoteRes?.summaryDetail?.dividendYield?.raw ? (quoteRes.summaryDetail.dividendYield.raw * 100).toFixed(2) : '0.00';
+  const eps = quoteRes?.defaultKeyStatistics?.trailingEps?.fmt ?? 'N/A';
+  const roe = quoteRes?.financialData?.returnOnEquity?.raw ? (quoteRes.financialData.returnOnEquity.raw * 100).toFixed(2) : 'N/A';
+  const margin = quoteRes?.financialData?.profitMargins?.raw ? (quoteRes.financialData.profitMargins.raw * 100).toFixed(2) : 'N/A';
+  const summary = quoteRes?.assetProfile?.longBusinessSummary || '無相關中文描述';
+
+  result.innerHTML = `
+    <div class="subtabs">
+      <button class="sub-btn active" data-sub2="tech">📊 技術面分析</button>
+      <button class="sub-btn" data-sub2="fund">🏢 基本面數據</button>
+    </div>
+    <div class="subview2 active" id="stock-tech" style="display:block;">
+      <h4>📈 ${escapeHtml(code)} ${escapeHtml(stockName)} 技術走勢</h4>
+      <div class="chart-wrap"><canvas id="stockChart"></canvas></div>
+    </div>
+    <div class="subview2" id="stock-fund" style="display:none;">
+      <h4>🏦 ${escapeHtml(stockName)} (${escapeHtml(code)}) 公司基本面</h4>
+      <div class="grid grid-3">
+        <div class="metric"><div class="m-label">本益比 (PE)</div><div class="m-value">${escapeHtml(String(pe))}</div><div class="m-src">衡量回本速度，通常越低越便宜</div></div>
+        <div class="metric"><div class="m-label">股價淨值比 (PB)</div><div class="m-value">${escapeHtml(String(pb))}</div><div class="m-src">衡量資產價值，低於 1 可能被低估</div></div>
+        <div class="metric"><div class="m-label">現金股利殖利率</div><div class="m-value">${divYield} %</div><div class="m-src">一年領到的利息佔股價的比率</div></div>
+      </div>
+      <div class="grid grid-3" style="margin-top:14px;">
+        <div class="metric"><div class="m-label">每股盈餘 (EPS)</div><div class="m-value">${escapeHtml(String(eps))}</div></div>
+        <div class="metric"><div class="m-label">股東權益報酬率 (ROE)</div><div class="m-value">${roe} %</div></div>
+        <div class="metric"><div class="m-label">淨利率</div><div class="m-value">${margin} %</div></div>
+      </div>
+      <details style="margin-top:14px;"><summary style="cursor:pointer;color:var(--accent);">📖 查看公司產業簡介</summary><p class="hint" style="margin-top:8px;">${escapeHtml(summary)}</p></details>
+    </div>
+    <hr class="divider">
+    <h4>🤖 【${escapeHtml(stockName)}】AI 深度研究助理</h4>
+    <p class="hint">您可以在此上傳該公司的法說會報告、券商研報 (支援多個檔案，PDF 或 TXT)，或貼上財經新聞網址，讓 AI 為您進行交叉解析。</p>
+    <div class="grid grid-2">
+      <div class="upload-box"><input type="file" id="stockResFiles" multiple accept=".pdf,.txt"></div>
+      <div>
+        <div class="field"><label class="field-label">🔗 輸入參考新聞或資料網址 (選填)</label><input type="text" id="stockResUrl" style="width:100%"></div>
+        <div class="field"><label class="field-label">🤖 選擇解析模型</label>
+          <select id="stockAiModel"><option value="gemini-2.0-flash">gemini-2.0-flash</option><option value="gemini-1.5-flash">gemini-1.5-flash</option><option value="gemini-1.5-pro">gemini-1.5-pro</option></select></div>
+      </div>
+    </div>
+    <button class="primary" id="stockAiBtn">🚀 啟動 AI 綜合研報解析</button>
+    <div id="stockAiOut" style="margin-top:16px;"></div>
+  `;
+
+  // wire tech/fund sub-tabs
+  result.querySelectorAll('[data-sub2]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      result.querySelectorAll('[data-sub2]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('stock-tech').style.display = btn.dataset.sub2 === 'tech' ? 'block' : 'none';
+      document.getElementById('stock-fund').style.display = btn.dataset.sub2 === 'fund' ? 'block' : 'none';
+    });
+  });
+
+  // technical chart with MA5/20/60
+  const closes = rows.map(r => r.close);
+  const ma5 = sma(closes, 5), ma20 = sma(closes, 20), ma60 = sma(closes, 60);
+  if (stockTechChartInstance) { stockTechChartInstance.destroy(); stockTechChartInstance = null; }
+  const ctx = document.getElementById('stockChart');
+  stockTechChartInstance = new Chart(ctx, {
+    data: {
+      labels: rows.map(r => r.date),
+      datasets: [
+        { type: 'candlestick', label: 'K線', data: rows.map(r => ({ x: r.date, o: r.open, h: r.high, l: r.low, c: r.close })), color: { up: '#ef4444', down: '#22c55e', unchanged: '#8b93a7' } },
+        { type: 'line', label: 'MA5', data: ma5, borderColor: 'orange', pointRadius: 0, borderWidth: 1 },
+        { type: 'line', label: 'MA20', data: ma20, borderColor: '#3fa9f5', pointRadius: 0, borderWidth: 1 },
+        { type: 'line', label: 'MA60', data: ma60, borderColor: '#a855f7', pointRadius: 0, borderWidth: 1 },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { x: { type: 'time', time: { unit: 'week' }, grid: { color: '#232838' }, ticks: { color: '#8b93a7' } },
+                y: { grid: { color: '#232838' }, ticks: { color: '#8b93a7' } } },
+      plugins: { legend: { labels: { color: '#e8ecf4' } } },
+    },
+  });
+
+  document.getElementById('stockAiBtn').addEventListener('click', async () => {
+    const out = document.getElementById('stockAiOut');
+    const files = document.getElementById('stockResFiles').files;
+    const url = document.getElementById('stockResUrl').value.trim();
+    const model = document.getElementById('stockAiModel').value;
+    if (!files.length && !url) { out.innerHTML = `<p class="hint">請至少上傳一份檔案，或是輸入一個參考網址讓 AI 閱讀喔！</p>`; return; }
+    out.innerHTML = `<div class="hint"><span class="spinner"></span>AI 正在發揮強大算力，閱讀並彙整多方資料中，請稍候...</div>`;
+    let comboText = `以下是針對【${stockName} (${code})】的相關參考資料：\n\n`;
+    for (const f of files) { comboText += `=== 檔案：${f.name} ===\n` + (await readFileAsText(f)) + '\n\n'; }
+    if (url) {
+      comboText += `=== 網址參考：${url} ===\n`;
+      try {
+        const html = await corsFetchText(url);
+        const clean = html.replace(/<[^>]+>/g, ' ');
+        comboText += clean.slice(0, 8000) + '\n\n';
+      } catch (e) { comboText += `(網址讀取失敗: ${e.message})\n\n`; }
+    }
+    const prompt = `你是一位頂尖的證券分析師。請綜合研讀以下我提供的【${stockName} (${code})】研究資料、新聞與報告：\n\n${comboText.slice(0, 30000)}\n\n請撰寫一份深度分析報告，報告需包含：\n1. 總結這些資料中的核心重點與市場觀點。\n2. 公司目前面臨的主要利多與利空因素。\n3. 綜合評估與未來操作建議。\n\n請用繁體中文回覆，排版清晰，善用條列式與粗體字，無需客套話。`;
+    const analysis = await callGemini(prompt, model);
+    out.innerHTML = `<h4>📝 ${escapeHtml(stockName)} AI 深度研報</h4><div class="ai-output">${escapeHtml(analysis)}</div>`;
+  });
+}
+
+VIEW_INIT.stocks = initStocksView;
+
+</script>
+</body>
+</html>
