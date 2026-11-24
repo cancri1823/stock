@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全球原物料戰情室 &amp; 四維聯動選股整合平台</title>
+    <style>
+        :root {
+            --nav-bg: #0f172a;
+            --nav-border: #1e293b;
+            --nav-text: #94a3b8;
+            --nav-text-hover: #f8fafc;
+            --nav-active-bg: #1e293b;
+            --nav-active-accent: #38bdf8;
+            --guide-bg: #f8fafc;
+            --guide-card: #ffffff;
+            --guide-text: #1e293b;
+            --guide-muted: #64748b;
+            --guide-border: #e2e8f0;
+            --guide-accent: #0284c7;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        html, body {
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+            background-color: var(--nav-bg);
+            overflow: hidden;
+        }
+        /* Top Navigation Bar (56px) */
+        .top-nav {
+            height: 56px;
+            background-color: var(--nav-bg);
+            border-bottom: 1px solid var(--nav-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1rem;
+            gap: 0.75rem;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+        .brand {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #f8fafc;
+            letter-spacing: 0.03em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+        .brand-badge {
+            font-size: 0.7rem;
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--nav-active-accent);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            padding: 0.15rem 0.45rem;
+            border-radius: 999px;
+            font-weight: 600;
+        }
+        .tab-group {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            height: 100%;
+        }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--nav-text);
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 0.5rem 0.95rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            position: relative;
+        }
+        .tab-btn:hover {
+            color: var(--nav-text-hover);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .tab-btn.active {
+            color: #ffffff;
+            background-color: var(--nav-active-bg);
+            box-shadow: inset 0 -2px 0 var(--nav-active-accent);
+            font-weight: 600;
+        }
+
+        /* Tab Panels */
+        .tab-panel {
+            width: 100%;
+            height: calc(100vh - 56px);
+            display: none;
+        }
+        .tab-panel.active {
+            display: block;
+        }
+        .app-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            background: #0b1120;
+        }
+        #panel-screener .app-frame {
+            background: #eef1f4;
+        }
+
+        /* Guide Panel */
+        #panel-guide {
+            background-color: var(--guide-bg);
+            color: var(--guide-text);
+            overflow-y: auto;
+            padding: 2rem 1.25rem 4rem;
+            line-height: 1.7;
+        }
+        .guide-container {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+        .guide-hero {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f8fafc;
+            padding: 2rem;
+            border-radius: 14px;
+            margin-bottom: 1.75rem;
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15);
+        }
+        .guide-hero h1 {
+            font-size: 1.65rem;
+            margin-bottom: 0.5rem;
+            color: #38bdf8;
+        }
+        .guide-hero p {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+        }
+        .guide-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .guide-card {
+            background: var(--guide-card);
+            border: 1px solid var(--guide-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+        .guide-card h2 {
+            font-size: 1.2rem;
+            color: #0f172a;
+            margin-bottom: 0.85rem;
+            padding-bottom: 0.6rem;
+            border-bottom: 2px solid var(--guide-border);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .guide-card h3 {
+            font-size: 1rem;
+            color: var(--guide-accent);
+            margin: 1rem 0 0.4rem;
+        }
+        .guide-card ul, .guide-card ol {
+            padding-left: 1.35rem;
+            color: #334155;
+            font-size: 0.93rem;
+        }
+        .guide-card li {
+            margin-bottom: 0.45rem;
+        }
+        .guide-card p {
+            color: #334155;
+            font-size: 0.93rem;
+            margin-bottom: 0.6rem;
+        }
+        .badge-pill {
+            display: inline-block;
+            padding: 0.15rem 0.55rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: #e0f2fe;
+            color: #0369a1;
+            margin-right: 0.35rem;
+        }
+        .security-box {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-left: 4px solid #16a34a;
+            padding: 1.25rem 1.5rem;
+            border-radius: 10px;
+        }
+        .security-box h2 {
+            color: #166534;
+            border-bottom-color: #bbf7d0;
+        }
+        code {
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 0.12rem 0.38rem;
+            border-radius: 4px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 0.85em;
+        }
+        @media (max-width: 640px) {
+            .brand-text { display: none; }
+            .tab-btn { padding: 0.45rem 0.7rem; font-size: 0.82rem; }
+            .guide-hero { padding: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 頂部導覽分頁列 -->
+    <nav class="top-nav" role="navigation" aria-label="主功能分頁">
+        <div class="brand">
+            <span>📊</span>
+            <span class="brand-text">投資戰情與選股整合平台</span>
+            <span class="brand-badge">雙系統隔離版</span>
+        </div>
+        <div class="tab-group" role="tablist">
+            <button class="tab-btn active" role="tab" aria-selected="true" data-target="panel-war-room">
+                1. 🌐 全球原物料與匯率戰情室
+            </button>
+            <button class="tab-btn" role="tab" aria-selected="false" data-target="panel-screener">
+                2. 📈 選股 · 四維聯動
+            </button>
+            <button class="tab-btn" role="tab" aria-selected="false" data-target="panel-guide">
+                3. 📖 網頁說明
+            </button>
+        </div>
+    </nav>
+
+    <!-- 分頁 1：全球原物料與匯率戰情室 (獨立 iframe srcdoc) -->
+    <section id="panel-war-room" class="tab-panel active" role="tabpanel">
+        <iframe id="frame-war-room" class="app-frame" title="全球原物料與匯率戰情室"></iframe>
+    </section>
+
+    <!-- 分頁 2：選股 · 四維聯動 (獨立 iframe srcdoc) -->
+    <section id="panel-screener" class="tab-panel" role="tabpanel">
+        <iframe id="frame-screener" class="app-frame" title="選股 · 四維聯動"></iframe>
+    </section>
+
+    <!-- 分頁 3：網頁說明 -->
+    <section id="panel-guide" class="tab-panel" role="tabpanel">
+        <div class="guide-container">
+            <div class="guide-hero">
+                <h1>📖 整合平台使用說明</h1>
+                <p>本網頁將「全球原物料與匯率戰情室」與「選股 · 四維聯動」整合於單一介面，並透過獨立的 <code>&lt;iframe srcdoc&gt;</code> 沙盒隔離技術，確保兩套系統的深淺色主題、JavaScript 變數、IndexedDB、localStorage 與 API 呼叫完全互不干擾。</p>
+            </div>
+
+            <div class="guide-card">
+                <h2>🧭 1. 系統總覽：雙系統的定位與互補關係</h2>
+                <div class="guide-grid" style="margin-bottom: 0;">
+                    <div>
+                        <h3>🌐 全球原物料與匯率戰情室（由上而下：總經環境）</h3>
+                        <p>專注於追蹤<strong>市場風險情緒（VIX）</strong>、<strong>能源與原物料（WTI/Brent 原油、金、銀、銅、鐵礦砂）</strong>以及<strong>主要匯率（USD/JPY/CNY/EUR 對台幣）</strong>。</p>
+                        <p>協助您在每天盤前或盤後掌握全球資金流向、通膨與原物料成本變化，並記錄當日戰略觀察筆記。</p>
+                    </div>
+                    <div>
+                        <h3>📈 選股 · 四維聯動（由下而上：個股基本面與買賣點）</h3>
+                        <p>串接 <strong>FinMind 台股資料庫</strong>，從<strong>基本面（40分）</strong>、<strong>估值（20分）</strong>、<strong>籌碼面（20分）</strong>與<strong>技術面（20分）</strong>四個維度對台股個股進行機械式評分。</p>
+                        <p><strong>互補運用</strong>：先透過「戰情室」確認大環境（如 VIX 是否飆高、匯率與原物料趨勢），再到「四維聯動」篩選體質優良且處於合理買點的個股。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="guide-card">
+                <h2>🌐 2. 「全球原物料與匯率戰情室」操作說明</h2>
+                <ul>
+                    <li><span class="badge-pill">本地快取</span> 系統內建 <strong>IndexedDB</strong> 資料庫，首次開啟會自動載入預設範例數據，所有新增或修改的每日紀錄都會即時儲存在您的瀏覽器中。</li>
+                    <li><span class="badge-pill">雲端同步</span> 若需跨裝置同步，可點擊右上角 <strong>「⚙️ 雲端設定」</strong> 輸入您的 Google OAuth Client ID，再點擊 <strong>「☁️ 連結 Google 雲端硬碟」</strong>，資料將以 <code>war_room_data.json</code> 儲存於您的雲端硬碟根目錄。</li>
+                    <li><span class="badge-pill">新增與編輯</span> 點擊 <strong>「➕ 新增 / 編輯當日數據」</strong> 可填寫或更新當日各項報價、漲跌幅與看盤筆記；點擊下方歷史表格任一列可快速切換上方看板顯示的日期。</li>
+                    <li><span class="badge-pill">資料匯出</span> 點擊 <strong>「📥 匯出 CSV」</strong> 可將所有歷史紀錄匯出為 UTF-8 CSV 檔案，方便使用 Excel 進行進階分析或備份。</li>
+                </ul>
+            </div>
+
+            <div class="guide-card">
+                <h2>📈 3. 「選股 · 四維聯動」操作說明</h2>
+                <ol>
+                    <li><span class="badge-pill">FinMind Token</span> 建議至 FinMind 官網註冊並複製 API Token 貼入上方欄位（有 Token 每小時可呼叫 600 次，未登入則為 300 次）。</li>
+                    <li><span class="badge-pill">加入股票</span> 在輸入框輸入 4 碼台股代號或名稱（如 <code>2330</code> 或 <code>台積電</code>）並按「加入」，清單會自動保存於瀏覽器。</li>
+                    <li><span class="badge-pill">四維評分</span> 設定「基本面可未通過項數」（預設 0 最嚴格，可放寬至 1~2 項，或勾選「不淘汰，全部評分」），點擊 <strong>「開始篩選」</strong>。總分 75 以上為「強烈關注」、60 以上「關注」、45 以上「觀察」。</li>
+                    <li><span class="badge-pill">快照與比對</span> 每次篩選完成會自動儲存當日快照。不同日期各篩選一次後，可切換至內部的 <strong>「比對」</strong> 頁籤，比較「新進榜」、「掉出榜」、「評級升降」與「股價變化」。</li>
+                    <li><span class="badge-pill">JSON 備份</span> 點擊 <strong>「匯出 JSON」</strong> 可備份當次完整分析結果；更換瀏覽器時可在「比對」頁籤匯入舊的 JSON 檔案接續追蹤。</li>
+                </ol>
+            </div>
+
+            <div class="guide-card security-box">
+                <h2>🔒 4. 資料儲存與隱私安全說明</h2>
+                <ul>
+                    <li><strong>純瀏覽器端運算，無後端伺服器：</strong>本整合頁面為純靜態 HTML 檔案，所有計算、篩選與圖表渲染皆在您的本機瀏覽器內完成。</li>
+                    <li><strong>憑證與資料不外流：</strong>您的 FinMind Token、Google OAuth Client ID、自選股清單與歷史快照僅儲存在您本機的 <code>localStorage</code> 與 <code>IndexedDB</code> 中，不會傳送至任何第三方伺服器（僅在您主動觸發同步或篩選時，直接向 Google Drive API 或 FinMind API 發送請求）。</li>
+                    <li><strong>投資風險提示：</strong>四維聯動分數係依固定財務與技術指標機械式計算，僅供研究與篩選參考，不構成任何投資建議。</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- 原始 HTML 1：war_room_dashboard.html (以 text/plain 隔離存放) -->
+    <script type="text/plain" id="tpl-war-room">
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全球原物料與匯率戰情室數位看板 (Google Drive 雲端版)</title>
+    <script src="https://accounts.google.com/gsi/client" async defer><\/script>
+    <style>
+        :root {
+            --bg-dark: #0b1120;
+            --bg-card: #131c31;
+            --bg-hover: #1e293b;
+            --border: #283548;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --up-color: #ef4444;    /* 台股習慣：紅漲 */
+            --down-color: #22c55e;  /* 台股習慣：綠跌 */
+            --flat-color: #94a3b8;
+            --gdrive: #34a853;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding: 1.5rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+        .title-group h1 {
+            font-size: 1.5rem;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .title-group p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.65rem;
+            align-items: center;
+        }
+        select, button, input, textarea {
+            font-family: inherit;
+            font-size: 0.9rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background-color: var(--bg-card);
+            color: var(--text-main);
+            padding: 0.5rem 0.85rem;
+            outline: none;
+        }
+        select:focus, input:focus, textarea:focus {
+            border-color: var(--accent);
+        }
+        button {
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        button:hover {
+            background-color: var(--bg-hover);
+        }
+        .btn-primary {
+            background-color: var(--accent);
+            color: #0b1120;
+            border-color: var(--accent);
+            font-weight: 600;
+        }
+        .btn-primary:hover {
+            background-color: #7dd3fc;
+        }
+        .btn-gdrive {
+            background-color: rgba(52, 168, 83, 0.15);
+            color: #4ade80;
+            border-color: rgba(52, 168, 83, 0.5);
+        }
+        .btn-gdrive:hover {
+            background-color: rgba(52, 168, 83, 0.28);
+        }
+        .btn-danger {
+            color: #fca5a5;
+            border-color: #7f1d1d;
+        }
+        .btn-danger:hover {
+            background-color: #7f1d1d;
+            color: #fff;
+        }
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(19, 28, 49, 0.8);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            margin-bottom: 1.25rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #64748b;
+        }
+        .dot.connected {
+            background-color: #4ade80;
+            box-shadow: 0 0 8px #4ade80;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem;
+        }
+        .card-header {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+            padding-bottom: 0.75rem;
+            margin-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0;
+            border-bottom: 1px dashed rgba(255,255,255,0.06);
+        }
+        .metric-row:last-child {
+            border-bottom: none;
+        }
+        .metric-name {
+            font-size: 0.92rem;
+            color: #e2e8f0;
+        }
+        .metric-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: block;
+        }
+        .metric-values {
+            text-align: right;
+        }
+        .metric-price {
+            font-family: "Consolas", "Fira Code", monospace;
+            font-size: 1rem;
+            font-weight: 600;
+            display: block;
+        }
+        .metric-change {
+            font-family: "Consolas", "Fira Code", monospace;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+        .up { color: var(--up-color); }
+        .down { color: var(--down-color); }
+        .flat { color: var(--flat-color); }
+
+        /* Notes Section */
+        .notes-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .notes-content {
+            font-size: 0.92rem;
+            color: #cbd5e1;
+            white-space: pre-wrap;
+        }
+
+        /* History Table */
+        .history-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+            text-align: right;
+        }
+        th, td {
+            padding: 0.7rem 0.6rem;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        th {
+            color: var(--text-muted);
+            font-weight: 600;
+            background-color: rgba(15, 23, 42, 0.5);
+        }
+        th:first-child, td:first-child {
+            text-align: left;
+        }
+        tr:hover td {
+            background-color: var(--bg-hover);
+            cursor: pointer;
+        }
+        tr.active-row td {
+            background-color: rgba(56, 189, 248, 0.12);
+        }
+
+        /* Modal */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: 50;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+        .modal-backdrop.open {
+            display: flex;
+        }
+        .modal {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 720px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.85rem;
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 1.25rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+        .help-box {
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+        }
+        .help-box ol {
+            padding-left: 1.25rem;
+            margin-top: 0.5rem;
+        }
+        .help-box li {
+            margin-bottom: 0.35rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <div class="title-group">
+            <h1>🌐 全球原物料與匯率戰情室看板</h1>
+            <p>Google 雲端硬碟同步 (<code style="color:#38bdf8">war_room_data.json</code>) • 本地 IndexedDB 快取</p>
+        </div>
+        <div class="controls">
+            <select id="dateSelect" onchange="selectDate(this.value)"></select>
+            <button onclick="toggleSort()" id="sortBtn">📅 排序：新 → 舊</button>
+            <button class="btn-gdrive" onclick="handleDriveAuth()" id="driveBtn">☁️ 連結 Google 雲端硬碟</button>
+            <button onclick="openConfigModal()" title="設定 Google OAuth Client ID">⚙️ 雲端設定</button>
+            <button class="btn-primary" onclick="openModal()">➕ 新增 / 編輯當日數據</button>
+            <button onclick="exportCSV()">📥 匯出 CSV</button>
+        </div>
+    </header>
+
+    <div class="status-bar">
+        <div class="status-indicator">
+            <span class="dot" id="driveDot"></span>
+            <span id="driveStatusText">尚未連結 Google 雲端硬碟（目前僅使用本機快取）</span>
+        </div>
+        <div id="lastSyncText"></div>
+    </div>
+
+    <div class="dashboard-grid" id="dashboardGrid"></div>
+
+    <div class="notes-card">
+        <div class="card-header">
+            <span>🔔 當日看盤與戰略重點訊息</span>
+            <span id="currentDateBadge" style="font-size: 0.85rem; color: var(--text-muted);"></span>
+        </div>
+        <div class="notes-content" id="notesContent"></div>
+    </div>
+
+    <div class="history-card">
+        <div class="card-header">
+            <span>📊 歷史行情總覽（點擊列可切換上方看板）</span>
+            <button class="btn-danger" style="font-size: 0.78rem; padding: 0.25rem 0.6rem;" onclick="deleteCurrentDate()">🗑️ 刪除此日紀錄</button>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>VIX</th>
+                    <th>WTI 原油</th>
+                    <th>Brent 原油</th>
+                    <th>現貨黃金</th>
+                    <th>現貨白銀</th>
+                    <th>銅 (USD/t)</th>
+                    <th>美元/台幣</th>
+                    <th>日圓/台幣</th>
+                </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="dataModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>新增 / 編輯每日戰情數據</h3>
+            <button onclick="closeModal()">✕</button>
+        </div>
+        <form id="dataForm" onsubmit="saveRecord(event)">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>日期 (YYYY-MM-DD)</label>
+                    <input type="date" id="f_date" required>
+                </div>
+                <div class="form-group">
+                    <label>VIX 恐慌指數 / 漲跌幅%</label>
+                    <div style="display:flex; gap:4px;">
+                        <input type="number" step="0.01" id="f_vix" required>
+                        <input type="number" step="0.01" id="f_vix_chg" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>WTI 原油 ($) / 漲跌幅%</label>
+                    <div style="display:flex; gap:4px;">
+                        <input type="number" step="0.01" id="f_wti" required>
+                        <input type="number" step="0.01" id="f_wti_chg" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Brent 原油 ($) / 漲跌幅%</label>
+                    <div style="display:flex; gap:4px;">
+                        <input type="number" step="0.01" id="f_brent" required>
+                        <input type="number" step="0.01" id="f_brent_chg" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>現貨黃金 ($/oz) / 漲跌幅%</label>
+                    <div style="display:flex; gap:4px;">
+                        <input type="number" step="0.01" id="f_gold" required>
+                        <input type="number" step="0.01" id="f_gold_chg" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>現貨白銀 ($/oz) / 漲跌幅%</label>
+                    <div style="display:flex; gap:4px;">
+                        <input type="number" step="0.01" id="f_silver" required>
+                        <input type="number" step="0.01" id="f_silver_chg" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>銅價 ($/ton) / 漲跌幅%</label>
+                    <div style="display:flex; gap:4px;">
+                        <input type="number" step="0.01" id="f_copper" required>
+                        <input type="number" step="0.01" id="f_copper_chg" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>鐵礦砂 (報價) / 漲跌幅%</label>
+                    <div style="display:flex; gap:4px;">
+                        <input type="text" id="f_iron" required>
+                        <input type="number" step="0.01" id="f_iron_chg" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>美元/台幣 (USD/TWD) / 漲跌幅%</label>
+                    <div style="display:flex; gap:4px;">
+                        <input type="number" step="0.0001" id="f_usd" required>
+                        <input type="number" step="0.01" id="f_usd_chg" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>日圓/台幣 (JPY/TWD) / 漲跌幅%</label>
+                    <div style="display:flex; gap:4px;">
+                        <input type="number" step="0.0001" id="f_jpy" required>
+                        <input type="number" step="0.01" id="f_jpy_chg" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>人民幣/台幣 (CNY/TWD) / 漲跌幅%</label>
+                    <div style="display:flex; gap:4px;">
+                        <input type="number" step="0.0001" id="f_cny" required>
+                        <input type="number" step="0.01" id="f_cny_chg" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>歐元/台幣 (EUR/TWD) / 漲跌幅%</label>
+                    <div style="display:flex; gap:4px;">
+                        <input type="number" step="0.0001" id="f_eur" required>
+                        <input type="number" step="0.01" id="f_eur_chg" required>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>當日看盤重點筆記</label>
+                <textarea id="f_notes" rows="4"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="closeModal()">取消</button>
+                <button type="submit" class="btn-primary">💾 儲存並同步至雲端硬碟</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="configModal">
+    <div class="modal" style="max-width: 560px;">
+        <div class="modal-header">
+            <h3>⚙️ Google 雲端硬碟連線設定</h3>
+            <button onclick="closeConfigModal()">✕</button>
+        </div>
+        <div class="help-box">
+            <strong>如何取得 Google OAuth Client ID：</strong>
+            <ol>
+                <li>前往 <strong>Google Cloud Console</strong>，選擇或建立專案並啟用 <strong>Google Drive API</strong>。</li>
+                <li>至「憑證」建立 <strong>OAuth 2.0 用戶端 ID</strong>（類型選「網頁應用程式」）。</li>
+                <li>在「已授權的 JavaScript 來源」加入本網頁的網址（例如 <code>http://localhost:8000</code> 或您架設的網域）。</li>
+                <li>將產生的 Client ID 貼入下方欄位即可。資料將以 <code>war_room_data.json</code> 儲存在您的雲端硬碟根目錄。</li>
+            </ol>
+        </div>
+        <div class="form-group">
+            <label>Google OAuth Client ID</label>
+            <input type="text" id="clientIdInput" placeholder="例如：123456789-abcdefg.apps.googleusercontent.com">
+        </div>
+        <div class="modal-footer">
+            <button type="button" onclick="closeConfigModal()">取消</button>
+            <button type="button" class="btn-primary" onclick="saveClientId()">儲存設定</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const DB_NAME = "WarRoomDashboardDB";
+    const STORE_NAME = "daily_quotes";
+    const DRIVE_FILE_NAME = "war_room_data.json";
+    const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file";
+
+    let db;
+    let allRecords = [];
+    let currentSelectedDate = null;
+    let sortDesc = true;
+
+    let tokenClient = null;
+    let accessToken = null;
+    let driveFileId = null;
+
+    const DEFAULT_RECORDS = [
+        {
+            date: "2026-11-24",
+            vix: 27.76, vix_chg: -22.65,
+            wti: 83.07, wti_chg: 0.23,
+            brent: 92.05, brent_chg: -0.82,
+            gold: 3652.00, gold_chg: 2.17,
+            silver: 42.39, silver_chg: 3.37,
+            copper: 12160.00, copper_chg: -2.92,
+            iron: "654.00 CNY", iron_chg: 0.23,
+            usd: 32.8266, usd_chg: 0.68,
+            jpy: 0.2061, jpy_chg: -0.64,
+            cny: 4.9130, cny_chg: -0.46,
+            eur: 35.7529, eur_chg: -1.19,
+            notes: "1. VIX 回落至 27.76 與銅價止跌反彈，科技與半導體籌碼（汎銓 6830、旺矽 6223、勝一 1773）迎來喘息窗口。\n2. WTI ($83.07) 與 Brent ($92.05) 維持低位，有利航運（新興 2605、陽明 2609）毛利，留意 11/29 OPEC+ 會議。\n3. 日圓對台幣 0.2061 甜蜜區間，適合評估「舊高雄車站」模型日本耗材採購。"
+        },
+        {
+            date: "2026-11-23",
+            vix: 35.89, vix_chg: 26.20,
+            wti: 83.41, wti_chg: 1.18,
+            brent: 92.57, brent_chg: 0.64,
+            gold: 3524.80, gold_chg: -2.51,
+            silver: 41.19, silver_chg: -3.86,
+            copper: 12230.50, copper_chg: -2.92,
+            iron: "$90.67 USD", iron_chg: -0.21,
+            usd: 32.9696, usd_chg: 0.00,
+            jpy: 0.2080, jpy_chg: 0.78,
+            cny: 4.9381, cny_chg: -0.37,
+            eur: 36.1000, eur_chg: -1.00,
+            notes: "1. VIX 跳升至 35.89（盤中觸及 40.03），半導體與高本益比科技股留意籌碼防禦。\n2. 油價維持百元下方，航運燃油成本壓力可控。\n3. 日圓交叉匯率 0.2080，持續追蹤換匯窗口。"
+        }
+    ];
+
+    function initDB() {
+        const request = indexedDB.open(DB_NAME, 1);
+        request.onupgradeneeded = (e) => {
+            db = e.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME, { keyPath: "date" });
+            }
+        };
+        request.onsuccess = (e) => {
+            db = e.target.result;
+            loadLocalRecords();
+        };
+    }
+
+    function loadLocalRecords() {
+        const tx = db.transaction(STORE_NAME, "readonly");
+        const req = tx.objectStore(STORE_NAME).getAll();
+        req.onsuccess = () => {
+            allRecords = req.result;
+            if (allRecords.length === 0) {
+                saveAllToLocal(DEFAULT_RECORDS, () => loadLocalRecords());
+                return;
+            }
+            renderAll();
+        };
+    }
+
+    function saveAllToLocal(records, callback) {
+        const tx = db.transaction(STORE_NAME, "readwrite");
+        const store = tx.objectStore(STORE_NAME);
+        store.clear();
+        records.forEach(r => store.put(r));
+        tx.oncomplete = () => {
+            if (callback) callback();
+        };
+    }
+
+    function openConfigModal() {
+        document.getElementById("clientIdInput").value = localStorage.getItem("gdrive_client_id") || "";
+        document.getElementById("configModal").classList.add("open");
+    }
+
+    function closeConfigModal() {
+        document.getElementById("configModal").classList.remove("open");
+    }
+
+    function saveClientId() {
+        const val = document.getElementById("clientIdInput").value.trim();
+        if (!val) return alert("請輸入有效的 Client ID");
+        localStorage.setItem("gdrive_client_id", val);
+        tokenClient = null;
+        closeConfigModal();
+        alert("Client ID 已儲存！現在可以點擊「連結 Google 雲端硬碟」。");
+    }
+
+    function handleDriveAuth() {
+        const clientId = localStorage.getItem("gdrive_client_id");
+        if (!clientId) {
+            openConfigModal();
+            return;
+        }
+        if (typeof google === "undefined" || !google.accounts) {
+            alert("Google 登入元件載入中或網路未連線，請稍後再試。");
+            return;
+        }
+        if (!tokenClient) {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: clientId,
+                scope: DRIVE_SCOPE,
+                callback: async (resp) => {
+                    if (resp.error) {
+                        alert("Google 授權失敗: " + resp.error);
+                        return;
+                    }
+                    accessToken = resp.access_token;
+                    updateDriveStatus(true, "已連結 Google 雲端硬碟，同步中...");
+                    await syncFromDrive();
+                }
+            });
+        }
+        tokenClient.requestAccessToken({ prompt: accessToken ? '' : 'consent' });
+    }
+
+    function updateDriveStatus(connected, text) {
+        const dot = document.getElementById("driveDot");
+        const statusText = document.getElementById("driveStatusText");
+        const btn = document.getElementById("driveBtn");
+        if (connected) {
+            dot.classList.add("connected");
+            btn.innerText = "🔄 立即同步雲端";
+        } else {
+            dot.classList.remove("connected");
+            btn.innerText = "☁️ 連結 Google 雲端硬碟";
+        }
+        statusText.innerText = text;
+    }
+
+    async function syncFromDrive() {
+        if (!accessToken) return;
+        try {
+            const q = encodeURIComponent(`name='${DRIVE_FILE_NAME}' and trashed=false`);
+            const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`, {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            const searchData = await searchRes.json();
+
+            if (searchData.files && searchData.files.length > 0) {
+                driveFileId = searchData.files[0].id;
+                const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`, {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                });
+                const cloudRecords = await fileRes.json();
+                if (Array.isArray(cloudRecords) && cloudRecords.length > 0) {
+                    const map = new Map();
+                    allRecords.forEach(r => map.set(r.date, r));
+                    cloudRecords.forEach(r => map.set(r.date, r));
+                    allRecords = Array.from(map.values());
+                    saveAllToLocal(allRecords, () => renderAll());
+                }
+                updateDriveStatus(true, `已連結 Google 雲端硬碟 (${DRIVE_FILE_NAME})`);
+            } else {
+                await uploadToDrive();
+            }
+            document.getElementById("lastSyncText").innerText = `最後同步：${new Date().toLocaleTimeString()}`;
+        } catch (err) {
+            console.error(err);
+            updateDriveStatus(false, "雲端同步失敗，請檢查網路或重新授權");
+        }
+    }
+
+    async function uploadToDrive() {
+        if (!accessToken) return;
+        try {
+            const metadata = { name: DRIVE_FILE_NAME, mimeType: "application/json" };
+            const fileContent = JSON.stringify(allRecords, null, 2);
+
+            if (driveFileId) {
+                await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`, {
+                    method: "PATCH",
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: fileContent
+                });
+            } else {
+                const form = new FormData();
+                form.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
+                form.append("file", new Blob([fileContent], { type: "application/json" }));
+                const res = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
+                    method: "POST",
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                    body: form
+                });
+                const data = await res.json();
+                driveFileId = data.id;
+            }
+            updateDriveStatus(true, `已連結並同步至 Google 雲端硬碟 (${DRIVE_FILE_NAME})`);
+            document.getElementById("lastSyncText").innerText = `最後同步：${new Date().toLocaleTimeString()}`;
+        } catch (err) {
+            console.error(err);
+            alert("上傳至 Google 雲端硬碟失敗，資料已暫存於本機。");
+        }
+    }
+
+    function formatChange(val) {
+        const num = parseFloat(val);
+        if (num > 0) return `<span class="metric-change up">+${num.toFixed(2)}% ▲</span>`;
+        if (num < 0) return `<span class="metric-change down">${num.toFixed(2)}% ▼</span>`;
+        return `<span class="metric-change flat">0.00% ─</span>`;
+    }
+
+    function renderAll() {
+        allRecords.sort((a, b) => sortDesc ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date));
+        if (!currentSelectedDate || !allRecords.find(r => r.date === currentSelectedDate)) {
+            currentSelectedDate = allRecords[0].date;
+        }
+
+        const select = document.getElementById("dateSelect");
+        select.innerHTML = allRecords.map(r => `<option value="${r.date}" ${r.date === currentSelectedDate ? 'selected' : ''}>${r.date}</option>`).join("");
+
+        const rec = allRecords.find(r => r.date === currentSelectedDate);
+        document.getElementById("currentDateBadge").innerText = `資料基準日：${rec.date}`;
+        document.getElementById("notesContent").innerText = rec.notes || "無當日備註。";
+
+        document.getElementById("dashboardGrid").innerHTML = `
+            <div class="card">
+                <div class="card-header"><span>⚡ 1. 能源與風險指標</span></div>
+                <div class="metric-row">
+                    <div><span class="metric-name">VIX 恐慌指數</span><span class="metric-sub">市場波動度指標</span></div>
+                    <div class="metric-values"><span class="metric-price">${rec.vix.toFixed(2)}</span>${formatChange(rec.vix_chg)}</div>
+                </div>
+                <div class="metric-row">
+                    <div><span class="metric-name">WTI 紐約原油</span><span class="metric-sub">USD / 桶</span></div>
+                    <div class="metric-values"><span class="metric-price">$${rec.wti.toFixed(2)}</span>${formatChange(rec.wti_chg)}</div>
+                </div>
+                <div class="metric-row">
+                    <div><span class="metric-name">Brent 布蘭特原油</span><span class="metric-sub">USD / 桶</span></div>
+                    <div class="metric-values"><span class="metric-price">$${rec.brent.toFixed(2)}</span>${formatChange(rec.brent_chg)}</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span>🪙 2. 貴金屬與關鍵原物料</span></div>
+                <div class="metric-row">
+                    <div><span class="metric-name">現貨黃金 (Gold)</span><span class="metric-sub">USD / oz</span></div>
+                    <div class="metric-values"><span class="metric-price">$${rec.gold.toLocaleString('en-US', {minimumFractionDigits:2})}</span>${formatChange(rec.gold_chg)}</div>
+                </div>
+                <div class="metric-row">
+                    <div><span class="metric-name">現貨白銀 (Silver)</span><span class="metric-sub">USD / oz</span></div>
+                    <div class="metric-values"><span class="metric-price">$${rec.silver.toFixed(2)}</span>${formatChange(rec.silver_chg)}</div>
+                </div>
+                <div class="metric-row">
+                    <div><span class="metric-name">高階銅 (Copper)</span><span class="metric-sub">USD / ton</span></div>
+                    <div class="metric-values"><span class="metric-price">$${rec.copper.toLocaleString('en-US', {minimumFractionDigits:2})}</span>${formatChange(rec.copper_chg)}</div>
+                </div>
+                <div class="metric-row">
+                    <div><span class="metric-name">鐵礦砂 (Iron Ore)</span><span class="metric-sub">報價基準</span></div>
+                    <div class="metric-values"><span class="metric-price">${rec.iron}</span>${formatChange(rec.iron_chg)}</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span>💱 3. 主要匯率行情 (對台幣 TWD)</span></div>
+                <div class="metric-row">
+                    <div><span class="metric-name">美元 (USD / TWD)</span><span class="metric-sub">外銷報價與進口成本</span></div>
+                    <div class="metric-values"><span class="metric-price">${rec.usd.toFixed(4)}</span>${formatChange(rec.usd_chg)}</div>
+                </div>
+                <div class="metric-row">
+                    <div><span class="metric-name">日圓 (JPY / TWD)</span><span class="metric-sub">日本模型耗材鎖價</span></div>
+                    <div class="metric-values"><span class="metric-price">${rec.jpy.toFixed(4)}</span>${formatChange(rec.jpy_chg)}</div>
+                </div>
+                <div class="metric-row">
+                    <div><span class="metric-name">人民幣 (CNY / TWD)</span><span class="metric-sub">亞幣連動參考</span></div>
+                    <div class="metric-values"><span class="metric-price">${rec.cny.toFixed(4)}</span>${formatChange(rec.cny_chg)}</div>
+                </div>
+                <div class="metric-row">
+                    <div><span class="metric-name">歐元 (EUR / TWD)</span><span class="metric-sub">歐洲市場基準</span></div>
+                    <div class="metric-values"><span class="metric-price">${rec.eur.toFixed(4)}</span>${formatChange(rec.eur_chg)}</div>
+                </div>
+            </div>
+        `;
+
+        document.getElementById("historyBody").innerHTML = allRecords.map(r => `
+            <tr class="${r.date === currentSelectedDate ? 'active-row' : ''}" onclick="selectDate('${r.date}')">
+                <td><strong>${r.date}</strong></td>
+                <td>${r.vix.toFixed(2)}</td>
+                <td>$${r.wti.toFixed(2)}</td>
+                <td>$${r.brent.toFixed(2)}</td>
+                <td>$${r.gold.toLocaleString('en-US', {minimumFractionDigits:2})}</td>
+                <td>$${r.silver.toFixed(2)}</td>
+                <td>$${r.copper.toLocaleString('en-US', {minimumFractionDigits:0})}</td>
+                <td>${r.usd.toFixed(4)}</td>
+                <td>${r.jpy.toFixed(4)}</td>
+            </tr>
+        `).join("");
+    }
+
+    function selectDate(date) {
+        currentSelectedDate = date;
+        renderAll();
+    }
+
+    function toggleSort() {
+        sortDesc = !sortDesc;
+        document.getElementById("sortBtn").innerText = sortDesc ? "📅 排序：新 → 舊" : "📅 排序：舊 → 新";
+        renderAll();
+    }
+
+    function openModal() {
+        const rec = allRecords.find(r => r.date === currentSelectedDate) || allRecords[0];
+        document.getElementById("f_date").value = new Date().toISOString().split('T')[0];
+        if (rec) {
+            document.getElementById("f_vix").value = rec.vix;
+            document.getElementById("f_vix_chg").value = rec.vix_chg;
+            document.getElementById("f_wti").value = rec.wti;
+            document.getElementById("f_wti_chg").value = rec.wti_chg;
+            document.getElementById("f_brent").value = rec.brent;
+            document.getElementById("f_brent_chg").value = rec.brent_chg;
+            document.getElementById("f_gold").value = rec.gold;
+            document.getElementById("f_gold_chg").value = rec.gold_chg;
+            document.getElementById("f_silver").value = rec.silver;
+            document.getElementById("f_silver_chg").value = rec.silver_chg;
+            document.getElementById("f_copper").value = rec.copper;
+            document.getElementById("f_copper_chg").value = rec.copper_chg;
+            document.getElementById("f_iron").value = rec.iron;
+            document.getElementById("f_iron_chg").value = rec.iron_chg;
+            document.getElementById("f_usd").value = rec.usd;
+            document.getElementById("f_usd_chg").value = rec.usd_chg;
+            document.getElementById("f_jpy").value = rec.jpy;
+            document.getElementById("f_jpy_chg").value = rec.jpy_chg;
+            document.getElementById("f_cny").value = rec.cny;
+            document.getElementById("f_cny_chg").value = rec.cny_chg;
+            document.getElementById("f_eur").value = rec.eur;
+            document.getElementById("f_eur_chg").value = rec.eur_chg;
+            document.getElementById("f_notes").value = rec.notes;
+        }
+        document.getElementById("dataModal").classList.add("open");
+    }
+
+    function closeModal() {
+        document.getElementById("dataModal").classList.remove("open");
+    }
+
+    async function saveRecord(e) {
+        e.preventDefault();
+        const record = {
+            date: document.getElementById("f_date").value,
+            vix: parseFloat(document.getElementById("f_vix").value),
+            vix_chg: parseFloat(document.getElementById("f_vix_chg").value),
+            wti: parseFloat(document.getElementById("f_wti").value),
+            wti_chg: parseFloat(document.getElementById("f_wti_chg").value),
+            brent: parseFloat(document.getElementById("f_brent").value),
+            brent_chg: parseFloat(document.getElementById("f_brent_chg").value),
+            gold: parseFloat(document.getElementById("f_gold").value),
+            gold_chg: parseFloat(document.getElementById("f_gold_chg").value),
+            silver: parseFloat(document.getElementById("f_silver").value),
+            silver_chg: parseFloat(document.getElementById("f_silver_chg").value),
+            copper: parseFloat(document.getElementById("f_copper").value),
+            copper_chg: parseFloat(document.getElementById("f_copper_chg").value),
+            iron: document.getElementById("f_iron").value,
+            iron_chg: parseFloat(document.getElementById("f_iron_chg").value),
+            usd: parseFloat(document.getElementById("f_usd").value),
+            usd_chg: parseFloat(document.getElementById("f_usd_chg").value),
+            jpy: parseFloat(document.getElementById("f_jpy").value),
+            jpy_chg: parseFloat(document.getElementById("f_jpy_chg").value),
+            cny: parseFloat(document.getElementById("f_cny").value),
+            cny_chg: parseFloat(document.getElementById("f_cny_chg").value),
+            eur: parseFloat(document.getElementById("f_eur").value),
+            eur_chg: parseFloat(document.getElementById("f_eur_chg").value),
+            notes: document.getElementById("f_notes").value
+        };
+
+        const idx = allRecords.findIndex(r => r.date === record.date);
+        if (idx >= 0) allRecords[idx] = record;
+        else allRecords.push(record);
+
+        currentSelectedDate = record.date;
+        saveAllToLocal(allRecords, async () => {
+            closeModal();
+            renderAll();
+            if (accessToken) await uploadToDrive();
+        });
+    }
+
+    async function deleteCurrentDate() {
+        if (allRecords.length <= 1) {
+            alert("至少需保留一筆紀錄！");
+            return;
+        }
+        if (!confirm(`確定要刪除 ${currentSelectedDate} 的紀錄嗎？`)) return;
+        allRecords = allRecords.filter(r => r.date !== currentSelectedDate);
+        currentSelectedDate = null;
+        saveAllToLocal(allRecords, async () => {
+            renderAll();
+            if (accessToken) await uploadToDrive();
+        });
+    }
+
+    function exportCSV() {
+        const headers = ["Date,VIX,VIX_Chg%,WTI,WTI_Chg%,Brent,Brent_Chg%,Gold,Gold_Chg%,Silver,Silver_Chg%,Copper,Copper_Chg%,IronOre,Iron_Chg%,USD_TWD,USD_Chg%,JPY_TWD,JPY_Chg%,CNY_TWD,CNY_Chg%,EUR_TWD,EUR_Chg%"];
+        const rows = allRecords.map(r => [
+            r.date, r.vix, r.vix_chg, r.wti, r.wti_chg, r.brent, r.brent_chg,
+            r.gold, r.gold_chg, r.silver, r.silver_chg, r.copper, r.copper_chg,
+            `"${r.iron}"`, r.iron_chg, r.usd, r.usd_chg, r.jpy, r.jpy_chg, r.cny, r.cny_chg, r.eur, r.eur_chg
+        ].join(","));
+        const csvContent = "\uFEFF" + headers.concat(rows).join("\n");
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `war_room_history_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+    }
+
+    initDB();
+<\/script>
+</body>
+</html>
+    </script>
+
+    <!-- 原始 HTML 2：index.html (以 text/plain 隔離存放) -->
+    <script type="text/plain" id="tpl-screener">
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>選股 · 四維聯動</title>
+<style>
+:root{--bg:#eef1f4;--ink:#1b2430;--mut:#66727f;--card:#fff;--line:#d5dbe2;--red:#c8372d;--amb:#b9770e;--teal:#0f6b6b;--blue:#3b5b8c;--vio:#7a5c99;--ok:#1d7a4a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 "Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;font-variant-numeric:tabular-nums}
+header{padding:18px 16px 10px;max-width:1100px;margin:auto}h1{margin:0;font-size:22px;letter-spacing:.04em}header p{margin:2px 0 0;color:var(--mut)}
+main{max-width:1100px;margin:auto;padding:0 16px 40px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:14px;margin-bottom:12px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.row>label{display:flex;gap:6px;align-items:center;color:var(--mut)}
+input,select,textarea,button{font:inherit;color:inherit}
+input[type=password],input[type=text],select,textarea{border:1px solid var(--line);border-radius:4px;padding:6px 8px;background:#fff}
+textarea{width:100%;height:64px;margin-top:8px;font-size:12px}
+button{border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:4px;padding:7px 14px;cursor:pointer}
+button.ghost{background:#fff;color:var(--ink);border-color:var(--line)}button:disabled{opacity:.4;cursor:default}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,th:focus-visible,tr:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
+#mkt{display:none;border-left:4px solid var(--teal)}#mkt.hot{border-color:var(--red)}
+#prog{height:4px;background:var(--line);border-radius:2px;margin-top:10px;overflow:hidden}#prog i{display:block;height:100%;width:0;background:var(--teal);transition:width .2s}
+#log{color:var(--mut);margin-top:6px;font-size:12px;min-height:18px}
+.wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:900px}
+th{font-weight:600;text-align:left;padding:8px;border-bottom:2px solid var(--ink);cursor:pointer;white-space:nowrap;user-select:none}
+td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}tr.s{cursor:pointer}tr.s:hover td{background:#f6f8fa}
+.bar{display:flex;height:10px;width:140px;background:#e6eaee;border-radius:2px;overflow:hidden}.bar i{display:block;height:100%}
+.sc{font-weight:700;display:inline-block;width:38px}
+.tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:12px;border:1px solid var(--line);margin:2px 4px 2px 0}
+.r1{color:#fff;background:var(--red);border-color:var(--red)}.r2{color:var(--red);border-color:var(--red)}.r3{color:var(--mut)}.r4{color:#9aa4ae}
+.sig{color:var(--ok);border-color:#b7dcc6;background:#f1faf5}.wrn{color:var(--amb);border-color:#ecd3a5;background:#fff8ea}
+.det td{background:#fafbfc;padding:12px 14px}.det h4{margin:10px 0 4px;font-size:13px}.det ul{margin:0;padding:0;list-style:none}.det li{padding:1px 0}
+.y{color:var(--ok)}.n{color:var(--red)}.mut{color:var(--mut)}.kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:2px 14px}
+.chips{margin-top:8px;min-height:30px}.chips .tag{background:#fff;font-size:13px;padding:2px 4px 2px 9px}.chips .tag button{background:none;border:0;color:var(--mut);padding:0 4px;font-size:15px;line-height:1}
+.tabs{display:flex;gap:6px;margin:0 0 12px}.tabs button{background:#fff;color:var(--ink);border-color:var(--line)}.tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.sum{display:flex;gap:18px;flex-wrap:wrap}.sum b{display:block;font-size:22px}.new{color:#fff;background:var(--red);border-color:var(--red)}.out{color:var(--mut);background:#eef1f4}ol.g{padding-left:20px;margin:0}ol.g li{margin:8px 0}
+.lg{display:flex;gap:12px;font-size:12px;color:var(--mut);margin:0 0 8px;flex-wrap:wrap}.lg b{display:inline-block;width:10px;height:10px;margin-right:4px;border-radius:2px}
+</style></head><body>
+<header><h1>選股 · 四維聯動</h1><p>基本面是主人，籌碼與技術面是狗。資料來源 FinMind，在瀏覽器內直接計算。<span style="opacity:.6">　v8</span></p></header>
+<main>
+<nav class="tabs"><button class="on" data-t="t1">篩選</button><button data-t="t2">比對</button><button data-t="t3">使用說明</button></nav>
+<div id="t1">
+<div class="panel">
+ <div class="row">
+  <label>FinMind Token <input id="tok" type="password" name="finmind_token" autocomplete="new-password" size="22" placeholder="登入後取得，可留空"></label>
+  <label>基本面可未通過 <select id="mf"><option>0</option><option>1</option><option>2</option><option>3</option></select> 項</label>
+  <label><input type="checkbox" id="ng"> 不淘汰，全部評分</label>
+  <label><input type="checkbox" id="nc"> 忽略快取</label>
+ </div>
+ <div class="row" style="margin-top:10px"><input id="sid" type="text" list="sl" size="28" placeholder="輸入代號或名稱，例如 2330" aria-label="股票代號或名稱" autocomplete="off"><datalist id="sl"></datalist><button id="add" class="ghost">加入</button><button id="clr" class="ghost">清空</button></div><div id="chips" class="chips"></div>
+ <div class="row" style="margin-top:10px"><button id="go">開始篩選</button><button id="stop" class="ghost" disabled>停止</button>
+  <button class="ghost" id="exj">匯出 JSON</button><button class="ghost" id="exc">匯出 CSV</button><button class="ghost" id="tst">連線測試</button></div>
+ <div id="prog"><i></i></div><div id="log">逐一加入股票後按「開始篩選」。額度用盡時按下停止或等待，稍後再執行會接續(已處理者有快取)。</div>
+</div>
+<div class="panel" id="mkt"></div>
+<div class="panel" id="out" style="display:none">
+ <div class="row" style="margin-bottom:8px"><label>評級 <select id="fl"><option value="">全部</option><option>強烈關注</option><option>關注</option><option>觀察</option><option>略過</option></select></label><span id="cnt" class="mut"></span></div>
+ <div class="lg"><span><b style="background:var(--red)"></b>基本面 40</span><span><b style="background:var(--blue)"></b>估值 20</span><span><b style="background:var(--teal)"></b>籌碼 20</span><span><b style="background:var(--vio)"></b>技術 20</span></div>
+ <div class="wrap"><table><thead><tr id="hd"></tr></thead><tbody id="tb"></tbody></table></div>
+</div>
+</div>
+<div id="t2" hidden>
+ <div class="panel"><div class="row">
+  <label>舊的快照 <select id="ca"></select></label><label>新的快照 <select id="cb"></select></label><button id="cg">開始比對</button>
+  <label>匯入先前匯出的 JSON <input type="file" id="ci" accept=".json"></label></div>
+  <div id="cm" class="mut" style="margin-top:8px">每次篩選完成都會自動存一份當日快照。不同日期各篩選一次後，就能在這裡比較。</div></div>
+ <div class="panel" id="cr" style="display:none"><div class="sum" id="cs"></div>
+  <div class="row" style="margin:12px 0 8px"><label>顯示 <select id="cf"><option value="">全部有變動</option><option>新進榜</option><option>掉出榜</option><option>升級</option><option>降級</option><option>持平</option></select></label></div>
+  <div class="wrap"><table><thead><tr><th>代號 / 名稱</th><th>狀態</th><th>舊分</th><th>新分</th><th>變動</th><th>評級</th><th>股價變動</th><th>新出現的訊號</th></tr></thead><tbody id="ct"></tbody></table></div></div>
+</div>
+<div id="t3" hidden><div class="panel"><ol class="g">
+ <li><b>取得 Token(建議)</b>：到 FinMind 官網(finmind.github.io)註冊並驗證信箱，登入後在使用者資訊頁複製 API token。有 Token 每小時可呼叫 600 次，沒有則 300 次。</li>
+ <li><b>開啟本頁</b>：用瀏覽器開啟這個 HTML 檔即可，或放到 GitHub Pages。若瀏覽器主控台出現 CORS 錯誤，請改放 GitHub Pages 使用。</li>
+ <li><b>貼上 Token</b>：切到「篩選」頁籤，貼到最上方的 Token 欄位。它只存在你的瀏覽器，不會上傳到別處。</li>
+ <li><b>逐一加入股票</b>：在輸入欄輸入 4 碼代號或名稱(如 2330 或 台積電)，按 Enter 或「加入」。重複步驟加入所有要看的股票，不想要的按標籤上的 × 移除。清單會自動保存。</li>
+ <li><b>設定嚴格度</b>：「基本面可未通過 N 項」預設 0，條件很嚴格，通過者會很少；可先改成 1 或 2。勾「不淘汰，全部評分」可看到每一檔的分數。</li>
+ <li><b>開始篩選</b>：按「開始篩選」並等待進度條跑完，每檔約需數秒。若顯示額度用盡，等一小時後再按一次，已處理的股票會從快取接續。</li>
+ <li><b>看結果</b>：點表頭排序，點任一列展開詳細資料：基本面各項是否通過、訊號與警示、PE、法人買賣超、五線譜價位。總分 75 以上為「強烈關注」，60 以上「關注」，45 以上「觀察」。</li>
+ <li><b>每天追蹤</b>：每次篩選完成會自動存當日快照(同日重跑會覆蓋)。隔天再篩選一次，切到「比對」頁籤選兩個日期按「開始比對」，就能看到新進榜、掉出榜、評級升降與股價變化。</li>
+ <li><b>備份</b>：按「匯出 JSON / CSV」可存檔。更換瀏覽器或清除資料後，在「比對」頁籤用「匯入先前匯出的 JSON」把舊結果加回來。</li>
+</ol><p class="mut">注意：分數是依你貼上的投資心法機械式計算，僅作篩選參考，不是投資建議。會計師意見等地雷無法由 FinMind 取得，需自行查證。</p></div></div>
+</main>
+<script>
+const API='https://api.finmindtrade.com/api/v4/data',$=s=>document.querySelector(s);
+const CFG={eps:3,epsY:5,gm:30,roe:15,re:40,core:.5,fcfY:3,ocf:.5,peC:12,pbC:1,peT:18,peS:40,mp:140,me:130};
+const HARD=['eps','gm','roe','reinvest','fcf','core','ocf_ni'],SOFT=['three_up'];
+const LBL={eps:'連5年EPS>3',gm:'毛利率>30%',roe:'5年均ROE>15%',reinvest:'盈再率<40%',fcf:'自由現金流為正',core:'本業獲利為主',ocf_ni:'盈餘品質(OCF/淨利)',three_up:'三率三升'};
+const CYC=new Set(['航運業','鋼鐵工業','塑膠工業','化學工業','水泥工業','造紙工業','玻璃陶瓷','紡織纖維','橡膠工業']),DRAM=new Set(['2408','2344','2337','8299','3260']);
+const CF_CUM=true;
+const DEF='2330 2317 2454 2308 2382 2412 2881 2882 2891 2886 2884 2885 2892 1301 1303 2002 1216 2912 3711 2357 2379 3008 3034 3045 4938 5871 5880 6505 2327 2395 2301 2207 1101 1102 2603 2609 2615 2801 2880 2883 2887 2890 3037 3231 3017 2345 6669 2383 2368 2376 2353 1590 9910 2049 2059 6415 3661 3443 5876 2408 2344';
+const sleep=ms=>new Promise(r=>setTimeout(r,ms)),iso=d=>d.toISOString().slice(0,10),ago=n=>iso(new Date(Date.now()-n*864e5));
+class RateErr extends Error{}
+const LS={g(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},s(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let results=[],stopFlag=false,sortK='total',sortD=-1,tokBad=false;
+
+const dead=new Set();
+async function diag(){try{const r=await fetch(API+'?dataset=TaiwanStockPrice&data_id=2330&start_date='+ago(5));if(r.status===402||r.status===429)return'rate';const j=await r.json();return j.status===402?'rate':j.status===200?'ok':'http'+r.status}catch(e){return'blocked'}}
+async function fm(ds,id,start,opt){
+ const p=new URLSearchParams({dataset:ds});if(id)p.set('data_id',id);if(start)p.set('start_date',start);
+ const t=$('#tok').value.trim().replace(/^["'\s]+|["'\s]+$/g,'').replace(/^Bearer\s+/i,'');if(t&&!tokBad)p.set('token',t);
+ if(opt&&dead.has(ds))return[];
+ let r,j;for(let k=0;k<(opt?1:2)&&!r;k++){try{r=await fetch(API+'?'+p)}catch(e){if(!k)await sleep(1500)}}
+ if(!r&&opt){dead.add(ds);return[]}
+ if(!r){const d=await diag();if(d==='rate')throw new RateErr();
+  if(d==='ok'&&t&&!tokBad){tokBad=true;return fm(ds,id,start,opt)}
+  throw new Error(`[${ds}] `+(tokBad?'不帶 Token 仍失敗：此資料集的請求被伺服器拒絕或無回應':d==='ok'?'帶 Token 的請求失敗：Token 可能無效/過期，或請求被伺服器拒絕':'無法連線 FinMind：網路問題、擴充功能阻擋，或 file:// 開啟被限制'))}
+ if(r.status===402||r.status===429)throw new RateErr();
+ try{j=await r.json()}catch(e){j={}}
+ if(j.status===402)throw new RateErr();
+ await sleep(250);
+ if(r.ok&&j.status===200)return j.data||[];
+ if(opt)return[];
+ throw new Error(`FinMind 回應異常 HTTP ${r.status}${j.msg?'：'+j.msg:''}`)}
+function ser(rows,ex,ct){const g={};for(const r of rows)(g[r.type]??=[]).push(r);
+ let k=ex.find(e=>g[e])||Object.keys(g).find(c=>ct.some(x=>c.toLowerCase().includes(x)));
+ return k?g[k].map(r=>({d:r.date,v:+r.value})).sort((a,b)=>a.d<b.d?-1:1):[]}
+const ann=s=>{const g={};s.forEach(x=>(g[x.d.slice(0,4)]??=[]).push(x.v));const o={};for(const y in g)if(g[y].length>=4)o[y]=g[y].reduce((a,b)=>a+b,0);return o};
+const ye=s=>{const o={};s.filter(x=>x.d.slice(5,7)==='12').forEach(x=>o[x.d.slice(0,4)]=x.v);return o};
+const tl=(o,n)=>Object.entries(o).slice(-n),mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
+const dv=(a,b,f=1)=>{const o={};for(const y in a)if(b[y])o[y]=a[y]/b[y]*f;return o};
+const qr=(a,b)=>{const m=new Map(b.map(x=>[x.d,x.v]));return a.filter(x=>m.get(x.d)).map(x=>x.v/m.get(x.d))};
+const ck=(ok,d)=>({pass:!!ok,detail:d}),f1=x=>(+x).toFixed(1),R=(x,n=2)=>x==null||!isFinite(x)?null:+(+x).toFixed(n);
+const sma=(a,n)=>a.map((_,i)=>i<n-1?NaN:mean(a.slice(i-n+1,i+1)));
+
+function s1(fin){const C={},m={};
+ const rev=ser(fin,['Revenue'],['revenue']),gp=ser(fin,['GrossProfit'],['grossprofit']),op=ser(fin,['OperatingIncome'],['operatingincome']),
+  pt=ser(fin,['PreTaxIncome'],['pretax']),ni=ser(fin,['IncomeAfterTaxes'],['incomeaftertax']),eps=ser(fin,['EPS'],['eps']);
+ m.niA=ann(ni);m.epsQ=eps;m.epsTtm=eps.length>=4?R(eps.slice(-4).reduce((a,b)=>a+b.v,0)):null;
+ const ea=ann(eps),e5=tl(ea,CFG.epsY);m.epsA=ea;
+ C.eps=e5.length<CFG.epsY?ck(0,`財報不足${CFG.epsY}年(僅${e5.length}年)`):ck(e5.every(e=>e[1]>CFG.eps),'EPS '+e5.map(e=>f1(e[1])).join(' / '));
+ const gmA=dv(ann(gp),ann(rev),100),g5=tl(gmA,CFG.epsY);m.gmA=gmA;
+ C.gm=g5.length?ck(g5.every(e=>e[1]>CFG.gm),'毛利率 '+g5.map(e=>f1(e[1])).join(' / ')+'%'):ck(0,'資料不足');
+ const oa=tl(ann(op),3),pa=ann(pt);
+ if(oa.length<3||oa.some(e=>!pa[e[0]]))C.core=ck(0,'營業利益/稅前淨利資料不足');
+ else{const rt=oa.map(e=>e[1]/pa[e[0]]);C.core=ck(oa.every(e=>e[1]>0)&&rt.every(x=>x>=CFG.core),'營益/稅前 '+rt.map(x=>x.toFixed(2)).join(' / '))}
+ const ups=[gp,op,ni].map(a=>{const q=qr(a,rev);return q.length>=5&&q.at(-1)>q.at(-5)});
+ C.three_up=ck(ups.every(Boolean),`毛利/營益/淨利率 YoY 上升: ${ups.map(u=>u?'是':'否').join('/')}`);
+ return[m,C]}
+function s2(m,C,bs,cf){
+ const eq=ye(ser(bs,['EquityAttributableToOwnersOfParent','Equity'],['equity'])),roe={};
+ for(const y in m.niA)if(eq[y]){const p=eq[y-1];roe[y]=m.niA[y]/(p?(eq[y]+p)/2:eq[y])*100}
+ const r5=tl(roe,CFG.epsY);m.roeA=roe;
+ C.roe=r5.length<3?ck(0,'ROE資料不足'):ck(mean(r5.map(e=>e[1]))>CFG.roe,'ROE '+r5.map(e=>f1(e[1])).join(' / ')+'% 均'+f1(mean(r5.map(e=>e[1]))));
+ const pk=(ex,ct)=>{const s=ser(cf,ex,ct);return CF_CUM?ye(s):ann(s)};
+ const ocf=pk(['CashFlowsFromOperatingActivities','NetCashInflowFromOperatingActivities','CashFlowsFromUsedInOperatingActivities'],['operatingactivities']),
+  icf=pk(['CashProvidedByInvestingActivities','CashFlowsFromInvestingActivities','NetCashInflowFromInvestingActivities'],['investingactivities']),
+  cap=pk(['PropertyAndPlantAndEquipment'],['propertyandplantandequipment']);m.ocfY=ocf;
+ const base=Object.keys(cap).length?cap:icf,re={};for(const y in base)if(m.niA[y])re[y]=Math.abs(base[y])/m.niA[y]*100;
+ const re5=tl(re,5);m.reAvg=re5.length?R(mean(re5.map(e=>e[1])),0):null;
+ C.reinvest=re5.length>=3?ck(mean(re5.map(e=>e[1]))<CFG.re&&mean(re5.map(e=>e[1]))>=0,'盈再率 '+re5.map(e=>f1(e[1])).join(' / ')+'%'):ck(0,'資本支出資料不足');
+ const fc={};for(const y in ocf)if(y in icf)fc[y]=ocf[y]+icf[y];const f3=tl(fc,CFG.fcfY);
+ C.fcf=f3.length>=CFG.fcfY?ck(f3.every(e=>e[1]>0),'FCF(百萬) '+f3.map(e=>(e[1]/1e6).toFixed(0)).join(' / ')):ck(0,'現金流資料不足');
+ const ys=Object.keys(ocf).filter(y=>m.niA[y]);
+ C.ocf_ni=ys.length?ck(ocf[ys.at(-1)]/m.niA[ys.at(-1)]>=CFG.ocf,'OCF/淨利 '+(ocf[ys.at(-1)]/m.niA[ys.at(-1)]).toFixed(2)):ck(0,'盈餘品質資料不足')}
+function risk(m,cyc){const w=[],o=tl(m.ocfY||{},2);
+ if(o.length==2&&o.every(e=>e[1]<0))w.push('地雷：營業現金流連2年為負');
+ if(cyc)return w;
+ const d3=(o,n)=>{const s=tl(o,3).map(e=>e[1]);if(s.length==3&&s[0]>s[1]&&s[1]>s[2])w.push(`地雷：${n}連3年下滑`)};
+ d3(m.gmA,'毛利率');d3(m.roeA||{},'ROE');d3(m.epsA,'EPS');
+ const r=tl(m.roeA||{},1);if(r.length&&r[0][1]<CFG.roe)w.push(`壞了：最新年度ROE ${f1(r[0][1])}% < ${CFG.roe}%`);
+ const e=m.epsQ.map(x=>x.v);if(e.length>=6&&e.at(-1)<e.at(-5)&&e.at(-2)<e.at(-6))w.push('壞了：EPS連2季YoY衰退');return w}
+
+function valuation(per,cyc,pos,eps){let pe=null,pb=null,sg=[],wn=[],sc=0;
+ if(per.length){const l=per.sort((a,b)=>a.date<b.date?-1:1).at(-1);pe=R(l.PER);pb=R(l.PBR)}
+ const v={pe,pb};
+ if(cyc){const lh=(eps!=null&&eps<=0)||(pe!=null&&(pe==0||pe>=25));
+  if(lh&&pos!=null&&pos<=.25){sg.push('景氣循環股：獲利低谷+股價低檔(逆勢買區)');sc=18}
+  else if(pe>0&&pe<=8){wn.push('景氣循環股：PE極低(獲利高峰)，留意賣出時機');sc=2}else sc=8;return[v,sg,wn,sc]}
+ if(!(pe>0))return[v,sg,['估值：無有效PE(虧損或缺資料)'],0];
+ if(pe<=CFG.peC){sg.push(`便宜價：PE ${pe} ≤ ${CFG.peC}`);sc=20}else if(pe<=15)sc=14;else if(pe<=CFG.peT)sc=8;
+ else if(pe<=CFG.peS){sc=3;wn.push(`昂貴：PE ${pe} > ${CFG.peT}，波段可分批停利`)}else wn.push(`貴了：PE ${pe} > ${CFG.peS}，長線賣出訊號`);
+ if(pb>0&&pb<=CFG.pbC){sg.push(`便宜價：PBR ${pb} ≤ ${CFG.pbC}`);sc=Math.min(20,sc+4)}
+ return[v,sg,wn,sc]}
+
+function chips(inst,hold){const sg=[],wn=[],d={};let sc=0;
+ if(inst.length){const G={外資:['Foreign_Investor','Foreign_Dealer_Self'],投信:['Investment_Trust']},D={};
+  for(const k in G){D[k]={};inst.filter(x=>G[k].includes(x.name)).forEach(x=>D[k][x.date]=(D[k][x.date]||0)+x.buy-x.sell)}
+  const last=(o,n)=>Object.keys(o).sort().slice(-n).map(k=>o[k]),fn=last(D.外資,10).reduce((a,b)=>a+b,0),tn=last(D.投信,10).reduce((a,b)=>a+b,0);
+  d.foreign10=Math.round(fn/1000);d.trust10=Math.round(tn/1000);let st=0;for(const v of last(D.投信,99).reverse()){if(v>0)st++;else break}d.trustStreak=st;
+  if(st>=3){sg.push(`投信連買 ${st} 日`);sc+=6}
+  if(fn>0&&tn>0){sg.push('雙資合擊：外資、投信同步買超');sc+=10}else if(fn>0||tn>0)sc+=3;
+  if((fn>0&&tn<0)||(tn>0&&fn<0)){wn.push('土洋對作：外資與投信方向相反');sc-=4}}
+ const big=hold.filter(h=>String(h.HoldingSharesLevel).includes('1,000,001')&&!String(h.HoldingSharesLevel).includes('-'));
+ if(big.length){const g={};big.forEach(h=>g[h.date]=(g[h.date]||0)+h.percent);const s=Object.keys(g).sort().map(k=>g[k]);
+  if(s.length>=3){const c=s.at(-1)-s[Math.max(0,s.length-5)];d.bigPct=R(s.at(-1));d.bigChg4w=R(c);
+   if(c>.3){sg.push(`千張大戶持股 4 週 +${c.toFixed(2)}%，籌碼集中`);sc+=6}else if(c<-.3){wn.push(`千張大戶持股 4 週 ${c.toFixed(2)}%，籌碼鬆動`);sc-=3}}}
+ return[d,sg,wn,Math.max(0,Math.min(20,sc))]}
+
+function tech(px){const sg=[],wn=[];let sc=0;
+ if(px.length<245)return[{},sg,['技術面：價格資料不足245日'],0,null];
+ px.sort((a,b)=>a.date<b.date?-1:1);const c=px.map(x=>+x.close),v=px.map(x=>+x.Trading_Volume),n=c.length,L=c[n-1];
+ const m5=sma(c,5),m10=sma(c,10),m30=sma(c,30),m60=sma(c,60),m240=sma(c,240),i=n-1;
+ if(L>=m240[i]&&m240[i]>=m240[i-20]){sg.push('站上年線且年線上揚(多方)');sc+=4}
+ if(L<m60[i]){wn.push('收盤跌破季線(MA60)：停利/出場訊號');sc-=4}
+ else if(m60[i]>=m60[i-5]&&L/m60[i]-1<=.03){sg.push('回檔至上揚季線獲支撐(波段買點)');sc+=8}
+ const t=[m5[i],m10[i],m30[i]],sp=Math.max(...t)/Math.min(...t)-1,flat=Math.abs(m30[i]/m30[i-10]-1)<.02;
+ const vr=v[i]/mean(v.slice(-21,-1)),y250=c.slice(-250).slice().sort((a,b)=>a-b),med=y250[125];
+ if(sp<.03&&flat&&L<=med&&vr>=2&&L/c[i-1]-1>=.03){sg.push('三線托底：均線黏合+爆量大漲(安全買點)');sc+=8}
+ const v60=sma(v,60),surge=v.slice(-40).some((x,k)=>x>=2*v60[n-40+k]);
+ if(surge&&mean(v.slice(-5))<=.5*v60[i]&&L>=m60[i]*.95){sg.push('回檔坑：放量建倉後量縮洗盤(水靜河飛)');sc+=6}
+ const y=c.slice(-875),N=y.length,xm=(N-1)/2,ym=mean(y);let sxy=0,sxx=0;y.forEach((q,k)=>{sxy+=(k-xm)*(q-ym);sxx+=(k-xm)**2});
+ const b=sxy/sxx,a=ym-b*xm,res=y.map((q,k)=>q-(a+b*k)),sd=Math.sqrt(mean(res.map(r=>r*r))),z=sd?res[N-1]/sd:0,tr=a+b*(N-1);
+ if(z<=-2){sg.push(`五線譜：股價在 -2σ 以下 (z=${z.toFixed(2)})，超賣極端區`);sc+=8}
+ else if(z<=-1){sg.push(`五線譜：股價低於 -1σ (z=${z.toFixed(2)})`);sc+=4}
+ else if(z>=2){wn.push(`五線譜：股價突破 +2σ (z=${z.toFixed(2)})，分批賣出區`);sc-=3}
+ const pos=c.slice(-250).filter(q=>q<=L).length/250;
+ return[{close:R(L),ma60:R(m60[i]),ma240:R(m240[i]),z:R(z),m2sd:R(tr-2*sd),p2sd:R(tr+2*sd)},sg,wn,Math.max(0,Math.min(20,sc)),pos]}
+
+async function analyze(id,info,chain,o){
+ const [name,ind,mk]=info[id]||[id,'',''],cyc=CYC.has(ind)||DRAM.has(id),Y=new Date().getFullYear()-7+'-01-01';
+ const nf=C=>HARD.filter(k=>C[k]&&!C[k].pass).length;
+ const fin=await fm('TaiwanStockFinancialStatements',id,Y);if(!fin.length&&!o.ng)return['nofin'];
+ let[m,C]=s1(fin);if(!cyc&&!o.ng&&nf(C)>o.mf)return['gate'];
+ const bs=await fm('TaiwanStockBalanceSheet',id,Y),cf=await fm('TaiwanStockCashFlowsStatement',id,Y);s2(m,C,bs,cf);
+ if(!cyc&&!o.ng&&nf(C)>o.mf)return['gate'];
+ const per=await fm('TaiwanStockPER',id,ago(20),1),px=await fm('TaiwanStockPrice',id,ago(1300)),
+  inst=await fm('TaiwanStockInstitutionalInvestorsBuySell',id,ago(45),1),hold=await fm('TaiwanStockHoldingSharesPer',id,ago(60),1);
+ if(!fin.length&&!px.length)throw new Error('查無財報與股價資料');px.sort((a,b)=>a.date<b.date?-1:1);const lp=px.at(-1),pp=px.at(-2),[T,ts,tw,tsc,pos]=tech(px),[V,vs,vw,vsc]=valuation(per,cyc,pos,m.epsTtm),[H,cs,cw,csc]=chips(inst,hold),rk=risk(m,cyc);
+ const ks=[...HARD,...SOFT].filter(k=>C[k]),fs=cyc?20:40*ks.filter(k=>C[k].pass).length/Math.max(1,ks.length);
+ const tot=Math.max(0,fs+vsc+csc+tsc-5*rk.filter(w=>w.startsWith('地雷')).length);
+ return['ok',{id,name,ind,mk,chain:(chain[id]||[]).join('、'),price:lp?R(lp.close):null,chg:lp&&pp?R((lp.close/pp.close-1)*100):null,pdate:lp?lp.date:null,cyc,total:R(tot,1),f:R(fs,1),v:vsc,c:csc,t:tsc,rating:tot>=75?'強烈關注':tot>=60?'關注':tot>=45?'觀察':'略過',
+  sig:[...vs,...cs,...ts],warn:[...rk,...vw,...cw,...tw],val:V,chip:H,tech:T,reAvg:m.reAvg,epsTtm:m.epsTtm,checks:C}]}
+
+async function marketMargin(){try{const d=await fm('TaiwanTotalExchangeMarginMaintenance',null,ago(15),1);if(!d.length)return null;
+ const l=d.sort((a,b)=>a.date<b.date?-1:1).at(-1),k=Object.keys(l).find(k=>k!=='date'&&isFinite(+l[k])&&l[k]!=='');return k?R(+l[k]):null}catch(e){if(e instanceof RateErr)throw e;return null}}
+
+async function infoMap(){let c=LS.g('info2');if(c&&Date.now()-c.t<6048e5)return c.m;
+ try{const rows=await fm('TaiwanStockInfo'),m={};rows.forEach(r=>{if(/^\d{4}$/.test(r.stock_id)&&!m[r.stock_id])m[r.stock_id]=[r.stock_name,r.industry_category,r.type]});
+  if(Object.keys(m).length)LS.s('info2',{t:Date.now(),m});return m}catch(e){return c?c.m:{}}}
+async function chainMap(){let c=LS.g('chain');if(c&&Date.now()-c.t<6048e5)return c.m;
+ try{const rows=await fm('TaiwanStockIndustryChain',null,null,1),m={};rows.forEach(r=>{const t=[r.industry,r.sub_industry].filter(Boolean).join('/');if(!t)return;const a=m[r.stock_id]??=[];if(!a.includes(t))a.push(t)});
+  if(Object.keys(m).length)LS.s('chain',{t:Date.now(),m});return m}catch(e){return c?c.m:{}}}
+function log(t,p){$('#log').textContent=t;if(p!=null)$('#prog i').style.width=p+'%'}
+async function run(){
+ const ids=[...list];if(!ids.length)return log('請先加入至少一檔股票');
+ LS.s('tok',$('#tok').value.trim());const o={mf:+$('#mf').value,ng:$('#ng').checked,nc:$('#nc').checked};
+ $('#go').disabled=true;$('#stop').disabled=false;stopFlag=false;tokBad=false;dead.clear();results=[];$('#out').style.display='none';
+ try{log('讀取股票資料…',0);const info=await infoMap(),chain=await chainMap();
+  const mm=await marketMargin();if(mm!=null){const e=$('#mkt');e.style.display='block';e.className='panel'+(mm<=CFG.mp?' hot':'');
+   e.innerHTML=`大盤整戶融資維持率 <b>${mm}%</b> ${mm<=CFG.me?'· 極度恐慌，中長線逆勢低接區':mm<=CFG.mp?'· 恐慌，留意黃金坑':'· 正常'}`}
+  const st={ok:0,gate:0,nofin:0},errs=[];let cerr=0;
+  for(let i=0;i<ids.length&&!stopFlag;i++){const id=ids[i];log(`${i+1}/${ids.length} 分析 ${id} ${(info[id]||[''])[0]}　通過 ${st.ok}　淘汰 ${st.gate}`,i/ids.length*100);
+   const rc=LS.g('res2:'+id),fc=LS.g('fail:'+id);
+   if(!o.nc&&rc&&Date.now()-rc.t<864e5&&rc.ng===o.ng&&rc.mf===o.mf){results.push(rc.r);st.ok++;continue}
+   if(!o.nc&&fc&&Date.now()-fc.t<6048e5&&fc.mf===o.mf&&!o.ng){st.gate++;continue}
+   let s,r;try{[s,r]=await analyze(id,info,chain,o)}catch(e){if(e instanceof RateErr)throw e;s='error';errs.push(`${id}：${e.message}`);console.error(id,e)}st[s]=(st[s]||0)+1;cerr=s==='error'?cerr+1:0;if(cerr>=3){errs.push('連續3檔失敗已中止，請按「連線測試」診斷');break}
+   if(s==='ok'){results.push(r);LS.s('res2:'+id,{t:Date.now(),ng:o.ng,mf:o.mf,r})}else if(s==='gate')LS.s('fail:'+id,{t:Date.now(),mf:o.mf})}
+  log(`完成：通過 ${st.ok} 檔，基本面淘汰 ${st.gate} 檔${st.nofin?`，無財報資料 ${st.nofin} 檔`:''}${errs.length?`，分析失敗 ${errs.length} 檔(${errs.slice(0,3).join('；')}${errs.length>3?'…':''})`:''}${stopFlag?'（已手動停止）':''}${tokBad?'　⚠ 帶 Token 的請求失敗(Token 無效，或該 Token 額度已用完)，已改用未登入額度':''}${dead.size?`　ℹ 無法取得「${[...dead].map(d=>({TaiwanStockHoldingSharesPer:'大戶持股',TaiwanStockIndustryChain:'產業別(產業鏈)',TaiwanTotalExchangeMarginMaintenance:'大盤融資維持率',TaiwanStockInstitutionalInvestorsBuySell:'法人買賣超',TaiwanStockPER:'PER'})[d]||d).join('、')}」資料，已略過該項`:''}`,100)
+ }catch(e){log(e instanceof RateErr?'FinMind 額度用盡，已顯示目前結果。稍後再按「開始篩選」會接續(已處理者有快取)。':'發生錯誤：'+e.message)}
+ $('#go').disabled=false;$('#stop').disabled=true;render();saveSnap()}
+
+const COLS=[['id','代號 / 名稱'],['price','現價'],['ind','類股'],['chain','產業別'],['total','總分'],['f','基'],['v','估'],['c','籌'],['t','技'],['rating','評級'],['pe','PE'],['n','訊號']];
+const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const key=(r,k)=>k==='pe'?(r.val.pe??1e9):k==='n'?r.sig.length:r[k];
+function render(){const fl=$('#fl').value;let rows=results.filter(r=>!fl||r.rating===fl);
+ rows.sort((a,b)=>{const x=key(a,sortK),y=key(b,sortK);return(x>y?1:x<y?-1:0)*sortD});
+ $('#out').style.display=results.length?'block':'none';$('#cnt').textContent=`${rows.length} / ${results.length} 檔`;
+ $('#hd').innerHTML=COLS.map(([k,t])=>`<th tabindex="0" data-k="${k}">${t}${k===sortK?(sortD>0?' ▲':' ▼'):''}</th>`).join('');
+ $('#tb').innerHTML=rows.map(r=>`<tr class="s" tabindex="0" data-id="${r.id}"><td><b>${r.id}</b> ${esc(r.name)}${r.cyc?' <span class="tag">循環股</span>':''}</td>
+ <td>${r.price??'—'}<br><span class="${r.chg>0?'n':r.chg<0?'y':'mut'}">${r.chg!=null?(r.chg>0?'+':'')+r.chg+'%':''}</span></td><td>${esc(r.ind||'—')}<br><span class="mut" style="font-size:12px">${({twse:'上市',tpex:'上櫃'})[r.mk]||''}</span></td><td class="mut" style="font-size:12px;max-width:190px">${esc(r.chain||'—')}</td>
+ <td><span class="sc">${r.total}</span></td><td>${r.f}</td><td>${r.v}</td><td>${r.c}</td><td>${r.t}</td>
+ <td><span class="tag r${['強烈關注','關注','觀察','略過'].indexOf(r.rating)+1}">${r.rating}</span></td><td>${r.val.pe??'—'}</td>
+ <td>${r.sig.length?`<span class="tag sig">${r.sig.length} 訊號</span>`:''}${r.warn.length?`<span class="tag wrn">${r.warn.length} 警示</span>`:''}</td></tr>
+ <tr class="det" id="d${r.id}" hidden><td colspan="12">${detail(r)}</td></tr>`).join('')}
+function bar(r){return`<div class="bar" title="基${r.f} 估${r.v} 籌${r.c} 技${r.t}"><i style="width:${r.f/100*100}%;background:var(--red)"></i><i style="width:${r.v}%;background:var(--blue)"></i><i style="width:${r.c}%;background:var(--teal)"></i><i style="width:${r.t}%;background:var(--vio)"></i></div>`}
+function detail(r){const kv=(o,m)=>Object.entries(m).map(([k,t])=>o[k]!=null?`<span><span class="mut">${t}</span> ${o[k]}</span>`:'').join('');
+ return`${bar(r)}<h4>訊號與警示</h4>${r.sig.map(s=>`<span class="tag sig">${esc(s)}</span>`).join('')}${r.warn.map(s=>`<span class="tag wrn">${esc(s)}</span>`).join('')||''}${r.sig.length+r.warn.length?'':'<span class="mut">無</span>'}
+ <h4>基本面檢核</h4><ul>${Object.keys(r.checks).map(k=>`<li><span class="${r.checks[k].pass?'y':'n'}">${r.checks[k].pass?'✓':'✗'}</span> ${LBL[k]||k}　<span class="mut">${esc(r.checks[k].detail)}</span></li>`).join('')}</ul>
+ <h4>數據</h4><div class="kv">${kv(r.val,{pe:'PE',pb:'PBR'})}${kv(r.chip,{foreign10:'外資10日(張)',trust10:'投信10日(張)',trustStreak:'投信連買(日)',bigPct:'千張大戶%',bigChg4w:'大戶4週變化%'})}${kv(r.tech,{close:'收盤',ma60:'季線',ma240:'年線',z:'五線譜z',m2sd:'-2σ價',p2sd:'+2σ價'})}${kv(r,{epsTtm:'近4季EPS',reAvg:'盈再率%',pdate:'報價日'})}</div>`}
+$('#tb').onclick=e=>{const t=e.target.closest('tr.s');if(t){const d=$('#d'+t.dataset.id);d.hidden=!d.hidden}};
+$('#tb').onkeydown=e=>{if(e.key==='Enter')e.target.click?.()};
+$('#hd').onclick=e=>{const k=e.target.closest('th')?.dataset.k;if(!k)return;sortD=k===sortK?-sortD:(['id','pe','ind','chain'].includes(k)?1:-1);sortK=k;render()};
+$('#fl').onchange=render;$('#go').onclick=run;$('#stop').onclick=()=>stopFlag=true;
+const dl=(n,t,mime)=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:mime}));a.download=n;a.click()};
+$('#exj').onclick=()=>dl('screener.json',JSON.stringify({generated:new Date().toISOString(),stocks:results},null,1),'application/json');
+$('#exc').onclick=()=>dl('screener.csv','\ufeff'+['代號,名稱,現價,漲跌%,類股,產業別,總分,基本面,估值,籌碼,技術,評級,PE,PBR,訊號,警示',...results.map(r=>[r.id,r.name,r.price,r.chg,r.ind,r.chain,r.total,r.f,r.v,r.c,r.t,r.rating,r.val.pe,r.val.pb,r.sig.join(' | '),r.warn.join(' | ')].map(x=>`"${String(x??'').replace(/"/g,'""')}"`).join(','))].join('\n'),'text/csv');
+let list=LS.g('list')||[],INFO={};
+function drawList(){LS.s('list',list);$('#chips').innerHTML=list.map(id=>`<span class="tag">${id} ${esc((INFO[id]||[''])[0])}<button data-x="${id}" aria-label="移除 ${id}">×</button></span>`).join('')||'<span class="mut">尚未加入股票</span>'}
+function addStock(){const v=$('#sid').value.trim();if(!v)return;let id=(v.match(/^\d{4}/)||[])[0];
+ if(!id)id=Object.keys(INFO).find(k=>INFO[k][0]===v)||Object.keys(INFO).find(k=>INFO[k][0].includes(v));
+ if(!id)return log(`找不到「${v}」，請輸入 4 碼股票代號或股票名稱`);
+ if(Object.keys(INFO).length&&!INFO[id])return log(`${id} 不在上市櫃股票清單中`);
+ if(list.includes(id))return log(`${id} 已在清單中`);list.push(id);$('#sid').value='';drawList();log(`已加入 ${id} ${(INFO[id]||[''])[0]}`);$('#sid').focus()}
+$('#add').onclick=addStock;$('#sid').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();addStock()}};
+$('#clr').onclick=()=>{list=[];drawList()};$('#chips').onclick=e=>{const x=e.target.dataset.x;if(x){list=list.filter(i=>i!==x);drawList()}};
+$('#tok').value=LS.g('tok')||'';drawList();
+infoMap().then(m=>{INFO=m;$('#sl').innerHTML=Object.keys(m).map(k=>`<option value="${k} ${esc(m[k][0])}">`).join('');drawList()});
+
+const RK={強烈關注:4,關注:3,觀察:2,略過:1};
+const slim=r=>({id:r.id,name:r.name,ind:r.ind||'',price:r.price??null,total:r.total,rating:r.rating,sig:r.sig||[]});
+const norm=s=>({id:s.id,name:s.name,ind:s.ind??s.industry??'',price:s.price??s.technical?.close??null,total:s.total??s.score?.total??0,rating:s.rating,sig:s.sig??s.signals??[]});
+let SN=LS.g('snaps')||[],crow=[];
+function fillSnaps(){const o=SN.map((x,i)=>`<option value="${i}">${x.d}（${x.stocks.length} 檔）</option>`).join('');$('#ca').innerHTML=o;$('#cb').innerHTML=o;$('#ca').selectedIndex=Math.max(0,SN.length-2);$('#cb').selectedIndex=Math.max(0,SN.length-1)}
+function saveSnap(){if(!results.length)return;const d=new Date().toLocaleDateString('sv-SE');SN=SN.filter(x=>x.d!==d);SN.push({d,stocks:results.map(slim)});SN.sort((a,b)=>a.d<b.d?-1:1);SN=SN.slice(-12);LS.s('snaps',SN);fillSnaps();$('#log').textContent+='　已存今日快照，可到「比對」頁籤比較。'}
+$('#ci').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const j=JSON.parse(await f.text()),g=(j.generated||j.meta?.generated||'').slice(0,10)||f.name.replace(/\.json$/,'');
+ let d=g;if(SN.some(x=>x.d===d))d=g+'(匯入)';SN.push({d,stocks:(j.stocks||[]).map(norm)});SN.sort((a,b)=>a.d<b.d?-1:1);LS.s('snaps',SN);fillSnaps();$('#cm').textContent=`已匯入 ${d}，共 ${j.stocks.length} 檔`}catch(x){$('#cm').textContent='無法讀取檔案：'+x.message}e.target.value=''};
+$('#cg').onclick=()=>{if(SN.length<2)return $('#cm').textContent='至少需要兩份快照：不同日期各篩選一次，或匯入先前的 JSON。';
+ const a=SN[$('#ca').value],b=SN[$('#cb').value];if(a===b)return $('#cm').textContent='請選擇兩份不同的快照';
+ const A=Object.fromEntries(a.stocks.map(x=>[x.id,x])),B=Object.fromEntries(b.stocks.map(x=>[x.id,x]));
+ crow=[...new Set([...Object.keys(A),...Object.keys(B)])].map(id=>{const p=A[id],q=B[id],x=q||p;let st,d;
+  if(!p){st='新進榜';d=q.total}else if(!q){st='掉出榜';d=-p.total}else{d=+(q.total-p.total).toFixed(1);const r=(RK[q.rating]||0)-(RK[p.rating]||0);st=r>0?'升級':r<0?'降級':'持平'}
+  return{id,name:x.name,ind:x.ind,st,ta:p?.total,tb:q?.total,d,ra:p?.rating,rb:q?.rating,pc:p&&q&&p.price&&q.price?(q.price/p.price-1)*100:null,ns:q?q.sig.filter(s=>!(p?.sig||[]).includes(s)):[]}});
+ $('#cm').textContent=`舊：${a.d}　新：${b.d}`;
+ $('#cs').innerHTML=['新進榜','掉出榜','升級','降級','持平'].map(k=>`<div><span class="mut">${k}</span><b>${crow.filter(r=>r.st===k).length}</b></div>`).join('');
+ $('#cr').style.display='block';drawCmp()};
+function drawCmp(){const f=$('#cf').value,L=crow.filter(r=>f?r.st===f:(r.st!=='持平'||Math.abs(r.d)>=1)).sort((a,b)=>Math.abs(b.d)-Math.abs(a.d));
+ $('#ct').innerHTML=L.map(r=>`<tr><td><b>${r.id}</b> ${esc(r.name)}<br><span class="mut" style="font-size:12px">${esc(r.ind)}</span></td><td><span class="tag ${r.st==='新進榜'?'new':r.st==='掉出榜'?'out':''}">${r.st}</span></td><td>${r.ta??'—'}</td><td>${r.tb??'—'}</td>
+ <td class="${r.d>0?'n':r.d<0?'y':'mut'}">${r.d>0?'+':''}${r.d}</td><td>${r.ra&&r.rb&&r.ra!==r.rb?r.ra+' → '+r.rb:(r.rb||r.ra||'—')}</td>
+ <td class="${r.pc>0?'n':r.pc<0?'y':'mut'}">${r.pc==null?'—':(r.pc>0?'+':'')+r.pc.toFixed(1)+'%'}</td><td>${r.ns.map(x=>`<span class="tag sig">${esc(x)}</span>`).join('')}</td></tr>`).join('')||'<tr><td colspan="8" class="mut">沒有符合的項目</td></tr>'}
+$('#cf').onchange=drawCmp;
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));['t1','t2','t3'].forEach(i=>$('#'+i).hidden=i!==b.dataset.t)});
+fillSnaps();
+
+$('#tst').onclick=async()=>{const t=$('#tok').value.trim().replace(/^["'\s]+|["'\s]+$/g,'').replace(/^Bearer\s+/i,''),L=[],el=$('#log');el.style.whiteSpace='pre-wrap';
+ const T=[['財報','TaiwanStockFinancialStatements','2019-01-01'],['資產負債表','TaiwanStockBalanceSheet','2019-01-01'],['現金流量表','TaiwanStockCashFlowsStatement','2019-01-01'],['股價','TaiwanStockPrice',ago(30)],['PER','TaiwanStockPER',ago(20)],['法人買賣超','TaiwanStockInstitutionalInvestorsBuySell',ago(30)],['大戶持股','TaiwanStockHoldingSharesPer',ago(60)]];
+ $('#tst').disabled=true;
+ for(const[n,d,st]of T)for(const u of[1,0]){if(u&&!t)continue;el.textContent='測試中…\n'+L.join('\n');
+  const p=new URLSearchParams({dataset:d,data_id:'1101',start_date:st});if(u)p.set('token',t);let m;
+  try{const r=await fetch(API+'?'+p),j=await r.json().catch(()=>({}));m=`HTTP ${r.status}，status ${j.status??'?'}，${j.data?j.data.length+' 筆資料':(j.msg||'無內容')}`}catch(e){m='失敗：瀏覽器收不到回應(被阻擋，或伺服器錯誤回應缺少 CORS 標頭)'}
+  L.push(`${n} ${u?'[帶 Token]':'[不帶 Token]'}：${m}`);await sleep(400)}
+ el.textContent='連線測試結果(1101 台泥)：\n'+L.join('\n');$('#tst').disabled=false};
+<\/script></body></html>
+    </script>
+
+    <!-- 外層整合控制腳本 -->
+    <script>
+        (function () {
+            // 將隔離存放的 HTML 注入各自獨立的 iframe srcdoc
+            const warRoomTpl = document.getElementById('tpl-war-room').textContent.replace(/<\\\/script>/g, '<' + '/script>');
+            const screenerTpl = document.getElementById('tpl-screener').textContent.replace(/<\\\/script>/g, '<' + '/script>');
+
+            document.getElementById('frame-war-room').srcdoc = warRoomTpl;
+            document.getElementById('frame-screener').srcdoc = screenerTpl;
+
+            // 分頁切換邏輯（保留 iframe 狀態不重載）
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabPanels = document.querySelectorAll('.tab-panel');
+
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetId = btn.getAttribute('data-target');
+
+                    tabButtons.forEach(b => {
+                        const isActive = b === btn;
+                        b.classList.toggle('active', isActive);
+                        b.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                    });
+
+                    tabPanels.forEach(panel => {
+                        panel.classList.toggle('active', panel.id === targetId);
+                    });
+                });
+            });
+        })();
+    </script>
+</body>
+</html>
